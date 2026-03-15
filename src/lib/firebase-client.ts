@@ -1,11 +1,16 @@
+
 /**
  * Firebase Client SDK Configuration
  * Used for browser-side authentication
+ *
+ * All Firebase imports are dynamic to prevent server-side localStorage crashes.
+ * Node.js 22+ exposes a broken localStorage global (via --localstorage-file),
+ * and firebase/auth's module init accesses it immediately on import.
  */
 
-import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
-import { getDatabase, type Database } from 'firebase/database';
+import type { FirebaseApp } from 'firebase/app';
+import type { Auth } from 'firebase/auth';
+import type { Database } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,36 +22,35 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase lazily (browser-only for auth/rtdb)
-function getFirebaseApp(): FirebaseApp {
-  if (!getApps().length) {
-    return initializeApp(firebaseConfig);
-  }
-  return getApp();
-}
-
-// Lazy getters to avoid calling getAuth() on the server
-// where localStorage is not available
+let _app: FirebaseApp | null = null;
 let _auth: Auth | null = null;
 let _rtdb: Database | null = null;
 
-export function getFirebaseAuth(): Auth {
+export async function getFirebaseApp(): Promise<FirebaseApp> {
+  if (!_app) {
+    const { initializeApp, getApps, getApp } = await import('firebase/app');
+    _app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  }
+  return _app;
+}
+
+export async function getFirebaseAuth(): Promise<Auth> {
   if (!_auth) {
-    _auth = getAuth(getFirebaseApp());
+    const app = await getFirebaseApp();
+    const { getAuth } = await import('firebase/auth');
+    _auth = getAuth(app);
   }
   return _auth;
 }
 
-export function getFirebaseRtdb(): Database {
+export async function getFirebaseRtdb(): Promise<Database> {
   if (!_rtdb) {
-    _rtdb = getDatabase(getFirebaseApp());
+    const app = await getFirebaseApp();
+    const { getDatabase } = await import('firebase/database');
+    _rtdb = getDatabase(app);
   }
   return _rtdb;
 }
-
-// Backward-compatible exports (use inside useEffect or event handlers only)
-export const auth = typeof window !== 'undefined' ? getFirebaseAuth() : (null as unknown as Auth);
-export const rtdb = typeof window !== 'undefined' ? getFirebaseRtdb() : (null as unknown as Database);
 
 // For game data - Realtime Database paths
 export const RTDB_PATHS = {
@@ -58,5 +62,3 @@ export const RTDB_PATHS = {
   USER_MAP_IN_GAME: (uid: string) => `Users/${uid}/MapInGame`,
   USER_VERSION: (uid: string) => `Users/${uid}/Version`,
 };
-
-export default getFirebaseApp;
