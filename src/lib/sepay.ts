@@ -18,10 +18,10 @@ const SEPAY_CONFIG = {
 // Order status enum
 export type OrderStatus = 'pending' | 'paid' | 'failed' | 'expired';
 
-// Generate unique order code (format: GM-XXXXXX)
+// Generate unique order code (format: GMXXXXXX — no special characters for bank transfer content)
 export function generateOrderCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude I, O, 0, 1 for readability
-  let result = 'GM-';
+  let result = 'GM';
   for (let i = 0; i < 6; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
@@ -85,8 +85,8 @@ export function verifySepayWebhook(headers: { authorization?: string }): boolean
 
 // Parse order code from webhook content
 export function parseOrderCode(content: string): string | null {
-  // Look for pattern GM-XXXXXX in the content
-  const match = content.match(/GM-[A-Z0-9]{6}/i);
+  // Look for pattern GMXXXXXX in the content (also supports legacy GM-XXXXXX)
+  const match = content.match(/GM-?[A-Z0-9]{6}/i);
   return match ? match[0].toUpperCase() : null;
 }
 
