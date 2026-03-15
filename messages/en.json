@@ -1,0 +1,191 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "purchase": "Buy Game",
+    "download": "Download",
+    "login": "Login",
+    "register": "Register",
+    "profile": "Profile",
+    "logout": "Logout",
+    "admin": "Admin"
+  },
+  "hero": {
+    "tagline": "Green Memories of Vietnamese Countryside",
+    "subtitle": "2D Farming Game with Vietnamese Culture",
+    "cta_primary": "Buy Game — 49,000₫",
+    "cta_secondary": "Watch Trailer ▶",
+    "platform": "Supports Windows 10/11 | Early Access"
+  },
+  "features": {
+    "title": "Key Features",
+    "farming": {
+      "title": "Farming",
+      "desc": "Plant and care for traditional Vietnamese crops"
+    },
+    "culture": {
+      "title": "Vietnamese Culture",
+      "desc": "Explore Vietnamese culture and landscapes"
+    },
+    "character": {
+      "title": "Character",
+      "desc": "Become a farmer in traditional attire"
+    },
+    "daynight": {
+      "title": "Day & Night",
+      "desc": "Dynamic day/night cycle and weather"
+    },
+    "economy": {
+      "title": "Economy",
+      "desc": "Build and grow a prosperous farm"
+    },
+    "cloudsave": {
+      "title": "Cloud Save",
+      "desc": "Auto-save progress to the cloud"
+    }
+  },
+  "pricing": {
+    "title": "Own The Game",
+    "price": "49,000₫",
+    "cta": "Buy Now",
+    "trust": {
+      "secure": "Secure Payment",
+      "updates": "Free Updates"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "remember": "Remember me",
+      "forgot": "Forgot password?",
+      "submit": "Login",
+      "google": "Login with Google",
+      "no_account": "No account? Register"
+    },
+    "register": {
+      "title": "Create Account",
+      "email": "Email",
+      "password": "Password",
+      "confirm_password": "Confirm Password",
+      "display_name": "Display Name (optional)",
+      "submit": "Create Account",
+      "google": "Register with Google",
+      "has_account": "Already have an account? Login"
+    },
+    "forgot_password": {
+      "title": "Forgot Password",
+      "email": "Email",
+      "submit": "Send Link",
+      "success": "Sent! Check your email inbox."
+    }
+  },
+  "payment": {
+    "title": "Payment",
+    "order_summary": "Order Summary",
+    "game_name": "The Green Memoir - Early Access",
+    "price": "49,000₫",
+    "features": {
+      "full_access": "Full game access",
+      "free_updates": "Free updates",
+      "cloud_save": "Cloud save"
+    },
+    "pay": "Pay Now",
+    "qr_title": "Scan QR to Pay",
+    "bank_info": "Bank Transfer Info",
+    "bank": "Bank",
+    "account_number": "Account Number",
+    "account_holder": "Account Holder",
+    "amount": "Amount",
+    "content": "Transfer Content",
+    "copy": "Copy",
+    "countdown": "Remaining",
+    "status_pending": "Waiting for payment...",
+    "status_paid": "Payment successful!",
+    "status_failed": "Payment failed",
+    "status_expired": "Order expired",
+    "confirm_payment": "I Have Paid",
+    "try_again": "Try Again",
+    "download_now": "Download Now"
+  },
+  "profile": {
+    "title": "Profile",
+    "member_since": "Member since",
+    "purchased": "Purchased",
+    "not_purchased": "Not Purchased",
+    "games": "Purchased Games",
+    "transactions": "Transaction History",
+    "settings": "Settings",
+    "change_name": "Change Display Name",
+    "change_password": "Change Password",
+    "date": "Date",
+    "order_code": "Order Code",
+    "amount": "Amount",
+    "status": "Status"
+  },
+  "download": {
+    "title": "Download Game",
+    "version": "Version",
+    "size": "Size",
+    "download_windows": "Download for Windows",
+    "checksum": "SHA256 Checksum",
+    "changelog": "Changelog",
+    "instructions": "Installation Instructions",
+    "steps": {
+      "1": "Extract the downloaded ZIP file",
+      "2": "Run the .exe file to install",
+      "3": "Login with your registered account",
+      "4": "Start playing!"
+    }
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "orders": "Orders",
+    "versions": "Versions",
+    "stats": {
+      "total_users": "Total Users",
+      "revenue": "Revenue",
+      "total_orders": "Total Orders",
+      "today_visits": "Today's Visits"
+    }
+  },
+  "footer": {
+    "description": "2D Farming Game with Vietnamese Culture",
+    "links": {
+      "title": "Links",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact"
+    },
+    "social": {
+      "title": "Connect",
+      "facebook": "Facebook",
+      "discord": "Discord"
+    },
+    "made_in": "Made with ♥ in Vietnam"
+  }
+}

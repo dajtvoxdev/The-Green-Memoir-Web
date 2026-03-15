@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Green Memoir theme colors from logo */
+  --green-dark: #2D5A27;
+  --green-main: #4A8C3F;
+  --green-light: #7BC96F;
+  --green-pale: #E8F5E3;
+  --brown-dark: #5C3D2E;
+  --brown-light: #C4A265;
+  --cream: #FFF8E7;
+  --cream-dark: #F5E6C8;
+  --gold: #DAA520;
+  --border: #D4C5A9;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--brown-dark);
+  font-family: var(--font-nunito), sans-serif;
+}
+
+/* Pixel art style borders */
+.pixel-border {
+  box-shadow: 
+    -4px 0 0 0 var(--brown-dark),
+    4px 0 0 0 var(--brown-dark),
+    0 -4px 0 0 var(--brown-dark),
+    0 4px 0 0 var(--brown-dark);
+  margin: 4px;
+}
+
+.pixel-border-sm {
+  box-shadow: 
+    -2px 0 0 0 var(--brown-dark),
+    2px 0 0 0 var(--brown-dark),
+    0 -2px 0 0 var(--brown-dark),
+    0 2px 0 0 var(--brown-dark);
+  margin: 2px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream-dark);
+  border: 2px solid var(--brown-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--green-main);
+  border: 2px solid var(--brown-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green-dark);
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px var(--green-light));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px var(--green-light));
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-green-dark text-white px-6 py-3 rounded-none font-bold;
+  @apply border-2 border-brown-dark;
+  @apply hover:bg-green-main transition-colors;
+  @apply active:bg-green-light;
+  box-shadow: 
+    -2px 2px 0 0 var(--brown-dark),
+    2px 2px 0 0 var(--brown-dark),
+    0 4px 0 0 var(--brown-dark);
+}
+
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 
+    -2px 0 0 0 var(--brown-dark),
+    2px 0 0 0 var(--brown-dark),
+    0 2px 0 0 var(--brown-dark);
+}
+
+.btn-secondary {
+  @apply bg-transparent text-brown-dark px-6 py-3 rounded-none font-bold;
+  @apply border-2 border-brown-dark;
+  @apply hover:bg-cream-dark transition-colors;
+  box-shadow: 
+    -2px 2px 0 0 var(--brown-dark),
+    2px 2px 0 0 var(--brown-dark),
+    0 4px 0 0 var(--brown-dark);
+}
+
+.btn-secondary:active {
+  transform: translateY(2px);
+  box-shadow: 
+    -2px 0 0 0 var(--brown-dark),
+    2px 0 0 0 var(--brown-dark),
+    0 2px 0 0 var(--brown-dark);
+}
+
+/* Card style */
+.card {
+  @apply bg-white border-2 border-brown-dark;
+  box-shadow: 
+    -4px 4px 0 0 var(--brown-dark),
+    4px 4px 0 0 var(--brown-dark);
+}
+
+/* Input style */
+.input {
+  @apply w-full px-4 py-3 bg-cream border-2 border-brown-dark;
+  @apply focus:outline-none focus:border-green-main;
+  box-shadow: inset -2px 2px 0 0 rgba(0,0,0,0.1);
+}
+
+/* Section divider - pixel art grass/dirt pattern */
+.section-divider {
+  height: 16px;
+  background: linear-gradient(180deg, 
+    var(--green-pale) 0%,
+    var(--green-main) 50%,
+    var(--brown-dark) 50%,
+    var(--brown-light) 100%
+  );
+  image-rendering: pixelated;
+}

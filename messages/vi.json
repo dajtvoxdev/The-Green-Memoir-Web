@@ -1,0 +1,191 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "close": "Đóng",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "previous": "Trước",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "sort": "Sắp xếp",
+    "view": "Xem",
+    "download": "Tải về",
+    "upload": "Tải lên",
+    "yes": "Có",
+    "no": "Không"
+  },
+  "nav": {
+    "home": "Trang Chủ",
+    "features": "Tính Năng",
+    "purchase": "Mua Game",
+    "download": "Tải Về",
+    "login": "Đăng Nhập",
+    "register": "Đăng Ký",
+    "profile": "Hồ Sơ",
+    "logout": "Đăng Xuất",
+    "admin": "Quản Trị"
+  },
+  "hero": {
+    "tagline": "Ký ức xanh của miền quê Việt Nam",
+    "subtitle": "Game nông trại 2D với văn hóa Việt Nam",
+    "cta_primary": "Mua Game — 49,000₫",
+    "cta_secondary": "Xem Trailer ▶",
+    "platform": "Hỗ trợ Windows 10/11 | Early Access"
+  },
+  "features": {
+    "title": "Tính Năng Nổi Bật",
+    "farming": {
+      "title": "Trồng Trọt",
+      "desc": "Trồng và chăm sóc cây trồng đặc trưng Việt Nam"
+    },
+    "culture": {
+      "title": "Văn Hóa VN",
+      "desc": "Khám phá văn hóa và phong cảnh Việt Nam"
+    },
+    "character": {
+      "title": "Nhân Vật",
+      "desc": "Hóa thân thành nông dân với trang phục truyền thống"
+    },
+    "daynight": {
+      "title": "Ngày Đêm",
+      "desc": "Chu kỳ ngày đêm và thời tiết thay đổi"
+    },
+    "economy": {
+      "title": "Kinh Tế",
+      "desc": "Xây dựng và phát triển nông trại thịnh vượng"
+    },
+    "cloudsave": {
+      "title": "Cloud Save",
+      "desc": "Lưu tiến độ tự động trên đám mây"
+    }
+  },
+  "pricing": {
+    "title": "Sở Hữu Game Ngay",
+    "price": "49,000₫",
+    "cta": "Mua Ngay",
+    "trust": {
+      "secure": "Thanh toán an toàn",
+      "updates": "Cập nhật miễn phí"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Đăng Nhập",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "remember": "Nhớ mật khẩu",
+      "forgot": "Quên mật khẩu?",
+      "submit": "Đăng Nhập",
+      "google": "Đăng nhập với Google",
+      "no_account": "Chưa có tài khoản? Đăng ký"
+    },
+    "register": {
+      "title": "Đăng Ký Tài Khoản",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "confirm_password": "Xác nhận mật khẩu",
+      "display_name": "Tên hiển thị (tùy chọn)",
+      "submit": "Tạo Tài Khoản",
+      "google": "Đăng ký với Google",
+      "has_account": "Đã có tài khoản? Đăng nhập"
+    },
+    "forgot_password": {
+      "title": "Quên Mật Khẩu",
+      "email": "Email",
+      "submit": "Gửi Liên Kết",
+      "success": "Đã gửi! Kiểm tra hộp thư email."
+    }
+  },
+  "payment": {
+    "title": "Thanh Toán",
+    "order_summary": "Xác Nhận Đơn Hàng",
+    "game_name": "The Green Memoir - Early Access",
+    "price": "49,000₫",
+    "features": {
+      "full_access": "Truy cập đầy đủ game",
+      "free_updates": "Cập nhật miễn phí",
+      "cloud_save": "Lưu đám mây"
+    },
+    "pay": "Thanh Toán",
+    "qr_title": "Quét QR Để Thanh Toán",
+    "bank_info": "Thông Tin Chuyển Khoản",
+    "bank": "Ngân Hàng",
+    "account_number": "Số Tài Khoản",
+    "account_holder": "Chủ Tài Khoản",
+    "amount": "Số Tiền",
+    "content": "Nội Dung CK",
+    "copy": "Sao Chép",
+    "countdown": "Còn Lại",
+    "status_pending": "Đang chờ thanh toán...",
+    "status_paid": "Thanh toán thành công!",
+    "status_failed": "Thanh toán không thành công",
+    "status_expired": "Đơn đã hết hạn",
+    "confirm_payment": "Tôi Đã Thanh Toán",
+    "try_again": "Thử Lại",
+    "download_now": "Tải Game Ngay"
+  },
+  "profile": {
+    "title": "Hồ Sơ Cá Nhân",
+    "member_since": "Thành viên từ",
+    "purchased": "Đã Mua",
+    "not_purchased": "Chưa Mua",
+    "games": "Game Đã Mua",
+    "transactions": "Lịch Sử Giao Dịch",
+    "settings": "Cài Đặt",
+    "change_name": "Đổi Tên Hiển Thị",
+    "change_password": "Đổi Mật Khẩu",
+    "date": "Ngày",
+    "order_code": "Mã Đơn",
+    "amount": "Số Tiền",
+    "status": "Trạng Thái"
+  },
+  "download": {
+    "title": "Tải Game",
+    "version": "Phiên Bản",
+    "size": "Dung Lượng",
+    "download_windows": "Tải Về cho Windows",
+    "checksum": "SHA256 Checksum",
+    "changelog": "Changelog",
+    "instructions": "Hướng Dẫn Cài Đặt",
+    "steps": {
+      "1": "Giải nén file ZIP đã tải về",
+      "2": "Chạy file .exe để cài đặt",
+      "3": "Đăng nhập bằng tài khoản đã đăng ký",
+      "4": "Bắt đầu chơi!"
+    }
+  },
+  "admin": {
+    "dashboard": "Bảng Điều Khiển",
+    "users": "Người Dùng",
+    "orders": "Đơn Hàng",
+    "versions": "Phiên Bản",
+    "stats": {
+      "total_users": "Tổng Users",
+      "revenue": "Doanh Thu",
+      "total_orders": "Tổng Đơn",
+      "today_visits": "Lượt Truy Cập Hôm Nay"
+    }
+  },
+  "footer": {
+    "description": "Game nông trại 2D với văn hóa Việt Nam",
+    "links": {
+      "title": "Liên Kết",
+      "privacy": "Chính Sách Bảo Mật",
+      "terms": "Điều Khoản Sử Dụng",
+      "contact": "Liên Hệ"
+    },
+    "social": {
+      "title": "Kết Nối",
+      "facebook": "Facebook",
+      "discord": "Discord"
+    },
+    "made_in": "Made with ♥ in Vietnam"
+  }
+}
