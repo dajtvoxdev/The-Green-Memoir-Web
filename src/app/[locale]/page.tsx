@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 // Generate metadata
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {

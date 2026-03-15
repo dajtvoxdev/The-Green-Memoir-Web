@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface HeaderProps {
   isLoggedIn?: boolean;
@@ -12,7 +12,14 @@ interface HeaderProps {
 
 export default function Header({ isLoggedIn = false, isAdmin = false, onLogout }: HeaderProps) {
   const t = useTranslations('nav');
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLocaleChange = (newLocale: string) => {
+    router.replace(pathname, { locale: newLocale as 'vi' | 'en' });
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-cream/90 backdrop-blur-sm border-b-2 border-border">
@@ -48,9 +55,10 @@ export default function Header({ isLoggedIn = false, isAdmin = false, onLogout }
         {/* Right side */}
         <div className="flex items-center gap-4">
           {/* Language Toggle */}
-          <select 
+          <select
             className="bg-transparent border-2 border-border px-2 py-1 text-sm text-brown-dark focus:outline-none focus:border-green-main"
-            defaultValue="vi"
+            value={locale}
+            onChange={(e) => handleLocaleChange(e.target.value)}
           >
             <option value="vi">VI</option>
             <option value="en">EN</option>
