@@ -3,19 +3,15 @@
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface HeaderProps {
-  isLoggedIn?: boolean;
-  isAdmin?: boolean;
-  onLogout?: () => void;
-}
-
-export default function Header({ isLoggedIn = false, isAdmin = false, onLogout }: HeaderProps) {
+export default function Header() {
   const t = useTranslations('nav');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isLoggedIn, isAdmin, logout } = useAuth();
 
   const handleLocaleChange = (newLocale: string) => {
     router.replace(pathname, { locale: newLocale as 'vi' | 'en' });
@@ -71,7 +67,7 @@ export default function Header({ isLoggedIn = false, isAdmin = false, onLogout }
                 href="/profile" 
                 className="w-8 h-8 bg-green-dark rounded-full flex items-center justify-center text-white font-bold"
               >
-                U
+                {(user?.displayName || user?.email || 'U')[0].toUpperCase()}
               </Link>
               {isAdmin && (
                 <Link 
@@ -82,7 +78,7 @@ export default function Header({ isLoggedIn = false, isAdmin = false, onLogout }
                 </Link>
               )}
               <button 
-                onClick={onLogout}
+                onClick={logout}
                 className="text-brown-dark hover:text-red-600 text-sm font-medium"
               >
                 {t('logout')}
@@ -174,7 +170,7 @@ export default function Header({ isLoggedIn = false, isAdmin = false, onLogout }
                 )}
                 <button 
                   onClick={() => {
-                    onLogout?.();
+                    logout?.();
                     setMobileMenuOpen(false);
                   }}
                   className="text-left text-red-600 font-medium py-2"

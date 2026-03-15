@@ -169,7 +169,7 @@ export default function ProfilePage() {
             {/* Game Card */}
             <div className="card bg-white p-6">
               <h3 className="font-heading text-xl text-green-dark mb-4">
-                Game Đã Mua
+                {user.hasPurchased ? 'Game Đã Mua' : 'Mua Game'}
               </h3>
               <div className="flex items-center gap-4 p-4 bg-cream-dark rounded-lg">
                 <img

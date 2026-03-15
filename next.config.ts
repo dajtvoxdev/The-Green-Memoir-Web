@@ -1,3 +1,13 @@
+// Fix Node.js 22+/25+ broken localStorage global before anything else loads.
+// Node ships a localStorage stub that exists but lacks methods like getItem(),
+// crashing Firebase and other libraries that detect it at module init time.
+if (
+  typeof globalThis.localStorage !== 'undefined' &&
+  typeof globalThis.localStorage.getItem !== 'function'
+) {
+  delete (globalThis as any).localStorage;
+}
+
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
 

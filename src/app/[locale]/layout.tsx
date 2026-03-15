@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/index';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { AuthProvider } from '@/contexts/AuthContext';
 import '../globals.css';
 
 // Google Fonts
@@ -75,11 +76,13 @@ export default async function LocaleLayout({
       </head>
       <body className="min-h-screen flex flex-col font-body">
         <NextIntlClientProvider messages={messages}>
-          <Header />
-          <main className="flex-1 pt-16">
-            {children}
-          </main>
-          <Footer />
+          <AuthProvider>
+            <Header />
+            <main className="flex-1 pt-16">
+              {children}
+            </main>
+            <Footer />
+          </AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>
