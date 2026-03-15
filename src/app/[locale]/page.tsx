@@ -1,10 +1,9 @@
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 // Generate metadata
-export async function generateMetadata({ params }: { params: { locale: string } }) {
-  const { locale } = params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'hero' });
   
   return {
@@ -13,8 +12,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   };
 }
 
-export default function LandingPage({ params }: { params: { locale: string } }) {
-  const { locale } = params;
+export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   
   // For client-side translations, we'd use useTranslations
   // But since this is a server component, we'll use the messages directly
@@ -137,10 +136,6 @@ export default function LandingPage({ params }: { params: { locale: string } }) 
                   src={`/images/screenshot-${i}.png`}
                   alt={`Screenshot ${i}`}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    // Fallback placeholder
-                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="640" height="360"%3E%3Crect fill="%23E8F5E3" width="640" height="360"/%3E%3Ctext fill="%232D5A27" font-family="sans-serif" font-size="24" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EScreenshot %3C/text%3E%3C/svg%3E';
-                  }}
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
               </div>

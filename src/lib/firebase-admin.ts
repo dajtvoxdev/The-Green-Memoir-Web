@@ -4,24 +4,40 @@
  */
 
 import admin from 'firebase-admin';
+import { readFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
 
 // Initialize Firebase Admin SDK
 function initFirebaseAdmin() {
   if (admin.apps.length === 0) {
-    // Try to initialize with service account key
-    const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-    
-    if (serviceAccountPath) {
-      const serviceAccount = require(serviceAccountPath);
+    const databaseURL = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL;
+
+    // Priority 1: JSON string from env var (Vercel deployment)
+    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    if (serviceAccountJson) {
+      const serviceAccount = JSON.parse(serviceAccountJson);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+        databaseURL,
       });
-    } else {
-      // Fallback to application default credentials (for Vercel/GCP)
-      admin.initializeApp({
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-      });
+    }
+    // Priority 2: File path (local development)
+    else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+      const filePath = resolve(process.cwd(), process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+      if (existsSync(filePath)) {
+        const serviceAccount = JSON.parse(readFileSync(filePath, 'utf-8'));
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          databaseURL,
+        });
+      } else {
+        console.warn('Service account file not found:', filePath);
+        admin.initializeApp({ databaseURL });
+      }
+    }
+    // Priority 3: Application default credentials (GCP environments)
+    else {
+      admin.initializeApp({ databaseURL });
     }
   }
   return admin;

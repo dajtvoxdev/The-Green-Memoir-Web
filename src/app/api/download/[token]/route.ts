@@ -12,10 +12,10 @@ import { getDownloadToken, markTokenAsUsed, getGameVersion } from '@/lib/firesto
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = params;
+    const { token } = await params;
 
     // Get download token from database
     const downloadToken = await getDownloadToken(token);

@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { locales } from '@/i18n';
+import { locales } from '@/i18n/index';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import '../globals.css';
@@ -22,8 +22,8 @@ const playfair = Playfair_Display({
 });
 
 // Metadata
-export async function generateMetadata({ params }: { params: { locale: string } }) {
-  const { locale } = params;
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   return {
     title: {
       default: 'The Green Memoir - Game Nông Trại 2D Việt Nam',
@@ -49,9 +49,9 @@ export default async function LocaleLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = params;
+  const { locale } = await params;
   
   // Validate locale
   if (!locales.includes(locale as any)) {
