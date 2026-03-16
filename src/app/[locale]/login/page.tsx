@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { getFirebaseAuth } from '@/lib/firebase-client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { refresh } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -38,7 +40,7 @@ export default function LoginPage() {
         throw new Error('Failed to create session');
       }
 
-      // Redirect to profile page
+      await refresh();
       router.push('/profile');
     } catch (err: any) {
       setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
@@ -70,6 +72,7 @@ export default function LoginPage() {
         throw new Error('Failed to create session');
       }
 
+      await refresh();
       router.push('/profile');
     } catch (err: any) {
       if (err.code === 'auth/popup-closed-by-user') {
