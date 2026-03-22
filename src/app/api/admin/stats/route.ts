@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         totalRevenue += data.amount || 0;
         paidOrders.push({ 
           amount: data.amount || 0, 
-          paidAt: data.paidAt?.toDate().toISOString() || null 
+          paidAt: data.paidAt?.toDate().toISOString() || data.createdAt?.toDate().toISOString() || null 
         });
       }
     });
@@ -72,6 +72,7 @@ export async function GET(request: NextRequest) {
     const recentUsers = recentUsersSnapshot.docs.map(doc => ({
       uid: doc.id,
       ...doc.data(),
+      disabled: doc.data().disabled || false,
       createdAt: doc.data().createdAt?.toDate().toISOString(),
     }));
 

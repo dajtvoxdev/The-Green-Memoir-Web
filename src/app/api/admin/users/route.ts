@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Timestamp } from 'firebase-admin/firestore';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
+import { adminAuth, adminDb, COLLECTIONS } from '@/lib/firebase-admin';
 import { listWebUsers } from '@/lib/firestore';
 
 export async function GET(request: NextRequest) {
@@ -38,6 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       users: users.map(u => ({
         ...u,
+        disabled: u.disabled || false,
         createdAt: u.createdAt?.toDate().toISOString(),
         updatedAt: u.updatedAt?.toDate().toISOString(),
       })),
@@ -49,6 +52,78 @@ export async function GET(request: NextRequest) {
     console.error('Admin users error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch users' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const user = await getCurrentUser({ cookie: request.headers.get('cookie') || undefined });
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userIsAdmin = await isAdmin(user.uid);
+    if (!userIsAdmin) {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const uid = typeof body.uid === 'string' ? body.uid.trim() : '';
+    const disabled = typeof body.disabled === 'boolean' ? body.disabled : null;
+
+    if (!uid) {
+      return NextResponse.json(
+        { error: 'uid is required' },
+        { status: 400 }
+      );
+    }
+
+    if (disabled === null) {
+      return NextResponse.json(
+        { error: 'disabled must be a boolean' },
+        { status: 400 }
+      );
+    }
+
+    if (uid === user.uid && disabled) {
+      return NextResponse.json(
+        { error: 'You cannot deactivate your own admin account' },
+        { status: 400 }
+      );
+    }
+
+    await adminAuth.updateUser(uid, { disabled });
+
+    if (disabled) {
+      await adminAuth.revokeRefreshTokens(uid);
+    }
+
+    await adminDb.collection(COLLECTIONS.WEB_USERS).doc(uid).set(
+      {
+        disabled,
+        updatedAt: Timestamp.now(),
+      },
+      { merge: true }
+    );
+
+    return NextResponse.json({
+      success: true,
+      uid,
+      disabled,
+      message: disabled ? 'User account deactivated' : 'User account reactivated',
+    });
+  } catch (error: any) {
+    console.error('Admin update user error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to update user' },
       { status: 500 }
     );
   }

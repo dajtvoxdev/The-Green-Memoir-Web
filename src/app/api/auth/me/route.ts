@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
       displayName: webUser?.displayName || user.name || null,
       hasPurchased: webUser?.hasPurchased || false,
       role: webUser?.role || 'user',
+      disabled: webUser?.disabled || false,
       createdAt: webUser?.createdAt?.toDate().toISOString() || null,
     });
   } catch (error: any) {

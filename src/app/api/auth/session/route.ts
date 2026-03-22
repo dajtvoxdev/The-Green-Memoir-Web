@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
         displayName: authUser.displayName || null,
         role: 'user',
         hasPurchased: false,
+        disabled: false,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
       });

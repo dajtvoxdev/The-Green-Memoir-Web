@@ -27,6 +27,7 @@ interface RecentUser {
   email: string;
   displayName: string | null;
   hasPurchased: boolean;
+  disabled?: boolean;
   role: string;
   createdAt: string;
 }
@@ -46,6 +47,7 @@ export default function AdminDashboardPage() {
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [revenueChart, setRevenueChart] = useState<RevenuePoint[]>([]);
   const [savingOrderId, setSavingOrderId] = useState<string | null>(null);
+  const [savingUserId, setSavingUserId] = useState<string | null>(null);
 
   const statusOptions: Array<{ value: RecentOrder['status']; label: string }> = [
     { value: 'pending', label: 'Chờ TT' },
@@ -152,6 +154,37 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleUserDisabledChange = async (uid: string, disabled: boolean) => {
+    const previousUsers = recentUsers;
+    setSavingUserId(uid);
+    setError('');
+    setRecentUsers((current) =>
+      current.map((user) => (user.uid === uid ? { ...user, disabled } : user)),
+    );
+
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uid, disabled }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Khong the cap nhat trang thai tai khoan');
+      }
+
+      await fetchStats();
+    } catch (err) {
+      setRecentUsers(previousUsers);
+      setError(err instanceof Error ? err.message : 'Khong the cap nhat trang thai tai khoan');
+    } finally {
+      setSavingUserId(null);
+    }
+  };
+
   // Simple bar chart using CSS
   const maxRevenue = Math.max(...revenueChart.map(r => r.revenue), 1);
 
@@ -223,7 +256,7 @@ export default function AdminDashboardPage() {
               {revenueChart.map((point) => (
                 <div
                   key={point.date}
-                  className="flex-1 min-w-[8px] group relative"
+                  className="flex-1 min-w-[8px] h-full group relative flex items-end"
                   title={`${point.date}: ${formatCurrency(point.revenue)}`}
                 >
                   <div
@@ -296,7 +329,7 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {recentUsers.map((u) => (
-                  <div key={u.uid} className="flex items-center justify-between p-3 bg-cream-dark rounded-lg">
+                  <div key={u.uid} className="flex items-center justify-between gap-3 p-3 bg-cream-dark rounded-lg">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 bg-green-dark rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                         {(u.displayName || u.email || '?')[0].toUpperCase()}
@@ -307,12 +340,28 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
+                      {u.disabled && (
+                        <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">Da khoa</span>
+                      )}
                       {u.hasPurchased && (
                         <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Đã mua</span>
                       )}
                       {u.role === 'admin' && (
                         <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs">Admin</span>
                       )}
+                    </div>
+                    <div className="flex-shrink-0">
+                      <button
+                        onClick={() => handleUserDisabledChange(u.uid, !(u.disabled || false))}
+                        disabled={savingUserId === u.uid || u.role === 'admin'}
+                        className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                          u.disabled
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                            : 'bg-red-100 text-red-700 hover:bg-red-200'
+                        }`}
+                      >
+                        {savingUserId === u.uid ? 'Dang luu...' : u.disabled ? 'Kich hoat lai' : 'Huy kich hoat'}
+                      </button>
                     </div>
                   </div>
                 ))}

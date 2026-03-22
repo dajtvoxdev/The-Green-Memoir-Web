@@ -15,6 +15,7 @@ export interface WebUser {
   displayName: string | null;
   role: UserRole;
   hasPurchased: boolean;
+  disabled?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
