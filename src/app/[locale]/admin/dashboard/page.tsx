@@ -17,7 +17,7 @@ interface RecentOrder {
   userId: string;
   userEmail: string;
   amount: number;
-  status: string;
+  status: 'pending' | 'paid' | 'failed' | 'expired';
   createdAt: string;
   paidAt: string | null;
 }
@@ -45,6 +45,14 @@ export default function AdminDashboardPage() {
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
   const [revenueChart, setRevenueChart] = useState<RevenuePoint[]>([]);
+  const [savingOrderId, setSavingOrderId] = useState<string | null>(null);
+
+  const statusOptions: Array<{ value: RecentOrder['status']; label: string }> = [
+    { value: 'pending', label: 'Chờ TT' },
+    { value: 'paid', label: 'Đã TT' },
+    { value: 'failed', label: 'Thất bại' },
+    { value: 'expired', label: 'Hết hạn' },
+  ];
 
   useEffect(() => {
     if (authLoading) return;
@@ -111,6 +119,37 @@ export default function AdminDashboardPage() {
         {labels[status] || status}
       </span>
     );
+  };
+
+  const handleOrderStatusChange = async (orderId: string, status: RecentOrder['status']) => {
+    const previousOrders = recentOrders;
+    setSavingOrderId(orderId);
+    setError('');
+    setRecentOrders((current) =>
+      current.map((order) => (order.id === orderId ? { ...order, status } : order)),
+    );
+
+    try {
+      const res = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId, status }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Không thể cập nhật trạng thái đơn hàng');
+      }
+
+      await fetchStats();
+    } catch (err) {
+      setRecentOrders(previousOrders);
+      setError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái đơn hàng');
+    } finally {
+      setSavingOrderId(null);
+    }
   };
 
   // Simple bar chart using CSS
@@ -212,14 +251,36 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-3">
                 {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 bg-cream-dark rounded-lg">
+                  <div key={order.id} className="flex items-center justify-between gap-3 p-3 bg-cream-dark rounded-lg">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-mono text-brown-dark truncate">{order.orderCode}</p>
                       <p className="text-xs text-brown-dark truncate">{order.userEmail}</p>
+                      <p className="text-xs text-brown-dark mt-1">{formatDate(order.createdAt)}</p>
                     </div>
-                    <div className="text-right ml-3">
+                    <div className="text-right ml-3 flex-shrink-0">
                       <p className="text-sm font-medium text-green-dark">{formatCurrency(order.amount)}</p>
                       {getStatusBadge(order.status)}
+                    </div>
+                    <div className="flex flex-col gap-2 w-32 flex-shrink-0">
+                      <label className="text-xs text-brown-dark text-left" htmlFor={`order-status-${order.id}`}>
+                        Trạng thái
+                      </label>
+                      <select
+                        id={`order-status-${order.id}`}
+                        className="bg-white border border-border rounded px-2 py-1 text-sm text-brown-dark disabled:opacity-60"
+                        value={order.status}
+                        disabled={savingOrderId === order.id}
+                        onChange={(event) => handleOrderStatusChange(order.id, event.target.value as RecentOrder['status'])}
+                      >
+                        {statusOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      {savingOrderId === order.id && (
+                        <p className="text-[11px] text-brown-dark text-left">Đang lưu...</p>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -48,6 +48,8 @@ const adminApp = initFirebaseAdmin();
 // Export Firebase Admin services
 export const adminAuth = adminApp.auth();
 export const adminDb = adminApp.firestore();
+// Prefer REST transport to avoid local gRPC hangs in CLI and serverless environments.
+adminDb.settings({ preferRest: true });
 export const adminRtdb = adminApp.database();
 
 // Firestore collection names
