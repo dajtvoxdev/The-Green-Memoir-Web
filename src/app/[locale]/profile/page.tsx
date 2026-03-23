@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { useEffect, useState } from 'react';
+import { Link, useRouter } from '@/i18n/navigation';
 
 interface User {
   uid: string;
@@ -26,10 +26,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchUserProfile();
+    void fetchUserProfile();
   }, []);
 
   const fetchUserProfile = async () => {
@@ -39,11 +38,10 @@ export default function ProfilePage() {
         router.push('/login');
         return;
       }
+
       const userData = await response.json();
       setUser(userData);
-      
-      // Fetch orders
-      fetchOrders(userData.uid);
+      void fetchOrders(userData.uid);
     } catch (err) {
       console.error('Fetch profile error:', err);
       router.push('/login');
@@ -55,10 +53,10 @@ export default function ProfilePage() {
   const fetchOrders = async (uid: string) => {
     try {
       const response = await fetch(`/api/admin/orders?userId=${uid}`);
-      if (response.ok) {
-        const data = await response.json();
-        setOrders(data.orders || []);
-      }
+      if (!response.ok) return;
+
+      const data = await response.json();
+      setOrders(data.orders || []);
     } catch (err) {
       console.error('Fetch orders error:', err);
     }
@@ -75,6 +73,7 @@ export default function ProfilePage() {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '-';
+
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
@@ -82,9 +81,7 @@ export default function ProfilePage() {
     });
   };
 
-  const formatCurrency = (amount: number) => {
-    return `${amount.toLocaleString('vi-VN')}₫`;
-  };
+  const formatCurrency = (amount: number) => `${amount.toLocaleString('vi-VN')}₫`;
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -93,14 +90,16 @@ export default function ProfilePage() {
       failed: 'bg-red-100 text-red-800',
       expired: 'bg-gray-100 text-gray-800',
     };
+
     const labels: Record<string, string> = {
       pending: 'Chờ thanh toán',
       paid: 'Đã thanh toán',
       failed: 'Thất bại',
       expired: 'Hết hạn',
     };
+
     return (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${styles[status] || styles.pending}`}>
+      <span className={`rounded px-2 py-1 text-xs font-medium ${styles[status] || styles.pending}`}>
         {labels[status] || status}
       </span>
     );
@@ -108,9 +107,9 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-4 bg-cream">
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-cream px-4 py-12">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-main border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-main border-t-transparent" />
           <p className="text-brown-dark">Đang tải hồ sơ...</p>
         </div>
       </div>
@@ -122,68 +121,60 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-12 px-4 bg-cream">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar */}
+    <div className="min-h-[calc(100vh-4rem)] bg-cream px-4 py-12">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           <div className="md:col-span-1">
             <div className="card bg-white p-6 text-center">
-              <div className="w-24 h-24 bg-green-dark rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4">
+              <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-green-dark text-3xl font-bold text-white">
                 {(user.displayName || user.email || 'U')[0].toUpperCase()}
               </div>
-              <h2 className="font-heading text-xl text-green-dark mb-1">
+              <h2 className="mb-1 font-heading text-xl text-green-dark">
                 {user.displayName || 'User'}
               </h2>
-              <p className="text-brown-dark text-sm mb-4">
-                {user.email}
-              </p>
+              <p className="mb-4 text-sm text-brown-dark">{user.email}</p>
+
               <div className="mb-4">
                 {user.hasPurchased ? (
-                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                    ✓ Đã Mua
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+                    ✓ Đã mua
                   </span>
                 ) : (
-                  <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                    Chưa Mua
+                  <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+                    Chưa mua
                   </span>
                 )}
               </div>
+
               {user.createdAt && (
-                <p className="text-brown-dark text-xs">
-                  Thành viên từ {formatDate(user.createdAt)}
-                </p>
+                <p className="text-xs text-brown-dark">Thành viên từ {formatDate(user.createdAt)}</p>
               )}
+
               {user.role === 'admin' && (
-                <a
+                <Link
                   href="/admin/dashboard"
-                  className="inline-block mt-4 text-green-main hover:text-green-dark text-sm font-medium"
+                  className="mt-4 inline-block text-sm font-medium text-green-main hover:text-green-dark"
                 >
                   Quản Trị →
-                </a>
+                </Link>
               )}
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="md:col-span-3 space-y-6">
-            {/* Game Card */}
+          <div className="space-y-6 md:col-span-3">
             <div className="card bg-white p-6">
-              <h3 className="font-heading text-xl text-green-dark mb-4">
-                {user.hasPurchased ? 'Game Đã Mua' : 'Mua Game'}
+              <h3 className="mb-4 font-heading text-xl text-green-dark">
+                {user.hasPurchased ? 'Game đã mua' : 'Mua game'}
               </h3>
-              <div className="flex items-center gap-4 p-4 bg-cream-dark rounded-lg">
+              <div className="flex items-center gap-4 rounded-lg bg-cream-dark p-4">
                 <img
                   src="/images/logo.png"
                   alt="The Green Memoir"
-                  className="w-20 h-20"
+                  className="h-20 w-20"
                 />
                 <div className="flex-1">
-                  <h4 className="font-heading text-lg text-green-dark">
-                    The Green Memoir - Early Access
-                  </h4>
-                  <p className="text-brown-dark text-sm">
-                    Phiên bản: v0.1.0-alpha
-                  </p>
+                  <h4 className="font-heading text-lg text-green-dark">The Green Memoir - Early Access</h4>
+                  <p className="text-sm text-brown-dark">Phiên bản: v0.1.0-alpha</p>
                 </div>
                 <div>
                   {user.hasPurchased ? (
@@ -191,63 +182,42 @@ export default function ProfilePage() {
                       onClick={() => router.push('/download')}
                       className="btn-primary"
                     >
-                      Tải Về
+                      Tải về
                     </button>
                   ) : (
                     <button
                       onClick={() => router.push('/purchase')}
                       className="btn-primary"
                     >
-                      Mua Ngay
+                      Mua ngay
                     </button>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Transaction History */}
             <div className="card bg-white p-6">
-              <h3 className="font-heading text-xl text-green-dark mb-4">
-                Lịch Sử Giao Dịch
-              </h3>
+              <h3 className="mb-4 font-heading text-xl text-green-dark">Lịch sử giao dịch</h3>
               {orders.length === 0 ? (
-                <p className="text-brown-dark text-center py-8">
-                  Chưa có giao dịch nào
-                </p>
+                <p className="py-8 text-center text-brown-dark">Chưa có giao dịch nào</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b-2 border-border">
-                        <th className="text-left py-3 px-4 text-brown-dark font-medium">
-                          Ngày
-                        </th>
-                        <th className="text-left py-3 px-4 text-brown-dark font-medium">
-                          Mã Đơn
-                        </th>
-                        <th className="text-left py-3 px-4 text-brown-dark font-medium">
-                          Số Tiền
-                        </th>
-                        <th className="text-left py-3 px-4 text-brown-dark font-medium">
-                          Trạng Thái
-                        </th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Ngày</th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Mã đơn</th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Số tiền</th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Trạng thái</th>
                       </tr>
                     </thead>
                     <tbody>
                       {orders.map((order) => (
                         <tr key={order.id} className="border-b border-border">
-                          <td className="py-3 px-4 text-brown-dark">
-                            {formatDate(order.createdAt)}
-                          </td>
-                          <td className="py-3 px-4 text-brown-dark font-mono text-sm">
-                            {order.orderCode}
-                          </td>
-                          <td className="py-3 px-4 text-brown-dark">
-                            {formatCurrency(order.amount)}
-                          </td>
-                          <td className="py-3 px-4">
-                            {getStatusBadge(order.status)}
-                          </td>
+                          <td className="px-4 py-3 text-brown-dark">{formatDate(order.createdAt)}</td>
+                          <td className="px-4 py-3 font-mono text-sm text-brown-dark">{order.orderCode}</td>
+                          <td className="px-4 py-3 text-brown-dark">{formatCurrency(order.amount)}</td>
+                          <td className="px-4 py-3">{getStatusBadge(order.status)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -256,23 +226,20 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Settings */}
             <div className="card bg-white p-6">
-              <h3 className="font-heading text-xl text-green-dark mb-4">
-                Cài Đặt
-              </h3>
+              <h3 className="mb-4 font-heading text-xl text-green-dark">Cài đặt</h3>
               <div className="space-y-4">
-                <button className="w-full text-left px-4 py-3 bg-cream-dark rounded-lg hover:bg-cream transition-colors text-brown-dark">
-                  Đổi Tên Hiển Thị
+                <button className="w-full rounded-lg bg-cream-dark px-4 py-3 text-left text-brown-dark transition-colors hover:bg-cream">
+                  Đổi tên hiển thị
                 </button>
-                <button className="w-full text-left px-4 py-3 bg-cream-dark rounded-lg hover:bg-cream transition-colors text-brown-dark">
-                  Đổi Mật Khẩu
+                <button className="w-full rounded-lg bg-cream-dark px-4 py-3 text-left text-brown-dark transition-colors hover:bg-cream">
+                  Đổi mật khẩu
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-red-600"
+                  className="w-full rounded-lg bg-red-50 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-100"
                 >
-                  Đăng Xuất
+                  Đăng xuất
                 </button>
               </div>
             </div>
