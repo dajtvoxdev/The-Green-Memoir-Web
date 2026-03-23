@@ -144,24 +144,24 @@
     "loginLinkText": "Đăng nhập"
   },
   "forgotPasswordPage": {
-    "description": "Nháº­p email cá»§a báº¡n vÃ  chÃºng tÃ´i sáº½ gá»­i link Ä‘áº·t láº¡i máº­t kháº©u.",
-    "sending": "Äang gá»­i...",
-    "error": "KhÃ´ng thá»ƒ gá»­i email Ä‘áº·t láº¡i máº­t kháº©u.",
-    "backToLogin": "â† Quay láº¡i Ä‘Äƒng nháº­p"
+    "description": "Nhập email của bạn và chúng tôi sẽ gửi link đặt lại mật khẩu.",
+    "sending": "Đang gửi...",
+    "error": "Không thể gửi email đặt lại mật khẩu.",
+    "backToLogin": "← Quay lại đăng nhập"
   },
   "changePassword": {
-    "open": "Äá»•i máº­t kháº©u",
-    "currentPassword": "Máº­t kháº©u hiá»‡n táº¡i",
-    "newPassword": "Máº­t kháº©u má»›i",
-    "confirmPassword": "XÃ¡c nháº­n máº­t kháº©u má»›i",
-    "saving": "Äang cáº­p nháº­t máº­t kháº©u...",
-    "success": "Äá»•i máº­t kháº©u thÃ nh cÃ´ng. HÃ£y dÃ¹ng máº­t kháº©u má»›i cho cáº£ web vÃ  game.",
-    "loginAgain": "Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i trÆ°á»›c khi Ä‘á»•i máº­t kháº©u.",
-    "currentRequired": "Vui lÃ²ng nháº­p máº­t kháº©u hiá»‡n táº¡i.",
-    "mismatch": "XÃ¡c nháº­n máº­t kháº©u má»›i khÃ´ng khá»›p.",
-    "minLength": "Máº­t kháº©u má»›i pháº£i cÃ³ Ã­t nháº¥t 6 kÃ½ tá»±.",
-    "wrongPassword": "Máº­t kháº©u hiá»‡n táº¡i khÃ´ng Ä‘Ãºng.",
-    "genericError": "KhÃ´ng thá»ƒ Ä‘á»•i máº­t kháº©u lÃºc nÃ y."
+    "open": "Đổi mật khẩu",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu mới",
+    "saving": "Đang cập nhật mật khẩu...",
+    "success": "Đổi mật khẩu thành công. Hãy dùng mật khẩu mới cho cả web và game.",
+    "loginAgain": "Vui lòng đăng nhập lại trước khi đổi mật khẩu.",
+    "currentRequired": "Vui lòng nhập mật khẩu hiện tại.",
+    "mismatch": "Xác nhận mật khẩu mới không khớp.",
+    "minLength": "Mật khẩu mới phải có ít nhất 6 ký tự.",
+    "wrongPassword": "Mật khẩu hiện tại không đúng.",
+    "genericError": "Không thể đổi mật khẩu lúc này."
   },
   "payment": {
     "title": "Thanh Toán",

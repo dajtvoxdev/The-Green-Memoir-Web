@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getFirebaseAuth } from '@/lib/firebase-client';
+import { CURRENT_GAME_TITLE, CURRENT_GAME_VERSION_NUMBER } from '@/lib/game-release';
 
 interface User {
   uid: string;
@@ -256,8 +257,8 @@ export default function ProfilePage() {
                   className="h-20 w-20"
                 />
                 <div className="flex-1">
-                  <h4 className="font-heading text-lg text-green-dark">The Green Memoir - Early Access</h4>
-                  <p className="text-sm text-brown-dark">{tPage('version', { version: 'v0.1.0-alpha' })}</p>
+                  <h4 className="font-heading text-lg text-green-dark">{CURRENT_GAME_TITLE}</h4>
+                  <p className="text-sm text-brown-dark">{tPage('version', { version: CURRENT_GAME_VERSION_NUMBER })}</p>
                 </div>
                 <div>
                   {user.hasPurchased ? (

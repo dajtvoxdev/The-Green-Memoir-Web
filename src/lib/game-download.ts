@@ -1,11 +1,9 @@
 import { existsSync, statSync } from 'fs';
 import { join } from 'path';
-
-const BUNDLED_GAME_FILE_NAME = 'Setup_MoonlitGarden_v0.02.exe';
-const BUNDLED_GAME_VERSION_ID = 'bundled-public-v0.02';
-const BUNDLED_GAME_VERSION_NUMBER = 'v0.02';
-const BUNDLED_GAME_DISPLAY_NAME = 'Moonlit Garden v0.02 Setup';
-const BUNDLED_GAME_DOWNLOAD_URL = `/game/${encodeURIComponent(BUNDLED_GAME_FILE_NAME)}`;
+import {
+  CURRENT_GAME_FILE_NAME,
+  CURRENT_GAME_RELEASE,
+} from '@/lib/game-release';
 
 export interface BundledGameDownload {
   versionId: string;
@@ -18,16 +16,16 @@ export interface BundledGameDownload {
 }
 
 export function getBundledGameDownload(): BundledGameDownload | null {
-  const filePath = join(process.cwd(), 'public', 'game', BUNDLED_GAME_FILE_NAME);
+  const filePath = join(process.cwd(), 'public', 'game', CURRENT_GAME_FILE_NAME);
   if (!existsSync(filePath)) {
     return null;
   }
 
   return {
-    versionId: BUNDLED_GAME_VERSION_ID,
-    versionNumber: BUNDLED_GAME_VERSION_NUMBER,
-    displayName: BUNDLED_GAME_DISPLAY_NAME,
-    downloadUrl: BUNDLED_GAME_DOWNLOAD_URL,
+    versionId: CURRENT_GAME_RELEASE.versionId,
+    versionNumber: CURRENT_GAME_RELEASE.versionNumber,
+    displayName: CURRENT_GAME_RELEASE.displayName,
+    downloadUrl: CURRENT_GAME_RELEASE.downloadPath,
     fileSize: statSync(filePath).size,
     checksum: '',
     changelog: '',
