@@ -300,16 +300,32 @@ export async function GET(request: NextRequest) {
     const userId = request.nextUrl.searchParams.get('userId');
 
     let orders;
+    let total = 0;
     if (userId) {
       orders = await getOrdersByUserId(userId, limit);
+      const totalSnapshot = await adminDb.collection(COLLECTIONS.ORDERS)
+        .where('userId', '==', userId)
+        .count()
+        .get();
+      total = totalSnapshot.data().count;
     } else if (status) {
       orders = await getOrdersByStatus(status, limit);
+      const totalSnapshot = await adminDb.collection(COLLECTIONS.ORDERS)
+        .where('status', '==', status)
+        .count()
+        .get();
+      total = totalSnapshot.data().count;
     } else {
       orders = await listOrders(limit, offset);
+      const totalSnapshot = await adminDb.collection(COLLECTIONS.ORDERS).count().get();
+      total = totalSnapshot.data().count;
     }
 
     return NextResponse.json({
       orders: orders.map(serializeOrder),
+      total,
+      limit,
+      offset,
     });
   } catch (error: any) {
     console.error('Admin orders error:', error);

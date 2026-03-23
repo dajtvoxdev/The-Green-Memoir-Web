@@ -1,8 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LineElement,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  type ChartData,
+  type ChartOptions,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
 interface Stats {
   totalUsers: number;
@@ -11,7 +26,7 @@ interface Stats {
   todayVisits: number;
 }
 
-interface RecentOrder {
+interface AdminOrder {
   id: string;
   orderCode: string;
   userId: string;
@@ -22,7 +37,7 @@ interface RecentOrder {
   paidAt: string | null;
 }
 
-interface RecentUser {
+interface AdminUser {
   uid: string;
   email: string;
   displayName: string | null;
@@ -37,24 +52,34 @@ interface RevenuePoint {
   revenue: number;
 }
 
+const ORDER_PAGE_SIZE = 12;
+const USER_PAGE_SIZE = 12;
+
+const statusOptions: Array<{ value: AdminOrder['status']; label: string }> = [
+  { value: 'pending', label: 'Chờ TT' },
+  { value: 'paid', label: 'Đã TT' },
+  { value: 'failed', label: 'Thất bại' },
+  { value: 'expired', label: 'Hết hạn' },
+];
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { isLoggedIn, isAdmin, loading: authLoading } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [stats, setStats] = useState<Stats | null>(null);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [revenueChart, setRevenueChart] = useState<RevenuePoint[]>([]);
+  const [ordersTotal, setOrdersTotal] = useState(0);
+  const [usersTotal, setUsersTotal] = useState(0);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [usersPage, setUsersPage] = useState(1);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [savingOrderId, setSavingOrderId] = useState<string | null>(null);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
-
-  const statusOptions: Array<{ value: RecentOrder['status']; label: string }> = [
-    { value: 'pending', label: 'Chờ TT' },
-    { value: 'paid', label: 'Đã TT' },
-    { value: 'failed', label: 'Thất bại' },
-    { value: 'expired', label: 'Hết hạn' },
-  ];
 
   useEffect(() => {
     if (authLoading) return;
@@ -66,35 +91,124 @@ export default function AdminDashboardPage() {
       router.push('/profile');
       return;
     }
-    fetchStats();
+
+    void fetchDashboard();
   }, [authLoading, isLoggedIn, isAdmin, router]);
 
-  const fetchStats = async () => {
+  useEffect(() => {
+    if (!isLoggedIn || !isAdmin) return;
+    void fetchOrdersPage(ordersPage);
+  }, [ordersPage, isLoggedIn, isAdmin]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !isAdmin) return;
+    void fetchUsersPage(usersPage);
+  }, [usersPage, isLoggedIn, isAdmin]);
+
+  const fetchDashboard = async () => {
+    setLoading(true);
+    setError('');
+
     try {
-      const res = await fetch('/api/admin/stats');
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Failed to load stats');
-        return;
+      const [statsRes, ordersRes, usersRes] = await Promise.all([
+        fetch('/api/admin/stats'),
+        fetch(`/api/admin/orders?limit=${ORDER_PAGE_SIZE}&offset=0`),
+        fetch(`/api/admin/users?limit=${USER_PAGE_SIZE}&offset=0`),
+      ]);
+
+      const [statsData, ordersData, usersData] = await Promise.all([
+        statsRes.json(),
+        ordersRes.json(),
+        usersRes.json(),
+      ]);
+
+      if (!statsRes.ok) {
+        throw new Error(statsData.error || 'Failed to load admin stats');
       }
-      const data = await res.json();
-      setStats(data.stats);
-      setRecentOrders(data.recentOrders || []);
-      setRecentUsers(data.recentUsers || []);
-      setRevenueChart(data.revenueChart || []);
+      if (!ordersRes.ok) {
+        throw new Error(ordersData.error || 'Failed to load orders');
+      }
+      if (!usersRes.ok) {
+        throw new Error(usersData.error || 'Failed to load users');
+      }
+
+      setStats(statsData.stats);
+      setRevenueChart(statsData.revenueChart || []);
+      setOrders(ordersData.orders || []);
+      setOrdersTotal(ordersData.total || 0);
+      setUsers(usersData.users || []);
+      setUsersTotal(usersData.total || 0);
+      setOrdersPage(1);
+      setUsersPage(1);
     } catch (err) {
-      setError('Failed to connect to server');
+      setError(err instanceof Error ? err.message : 'Failed to connect to server');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatCurrency = (amount: number) =>
-    `${amount.toLocaleString('vi-VN')}₫`;
+  const fetchOrdersPage = async (page: number) => {
+    if (loading) return;
+
+    setOrdersLoading(true);
+    try {
+      const offset = (page - 1) * ORDER_PAGE_SIZE;
+      const res = await fetch(`/api/admin/orders?limit=${ORDER_PAGE_SIZE}&offset=${offset}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to load orders');
+      }
+
+      setOrders(data.orders || []);
+      setOrdersTotal(data.total || 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load orders');
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const fetchUsersPage = async (page: number) => {
+    if (loading) return;
+
+    setUsersLoading(true);
+    try {
+      const offset = (page - 1) * USER_PAGE_SIZE;
+      const res = await fetch(`/api/admin/users?limit=${USER_PAGE_SIZE}&offset=${offset}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to load users');
+      }
+
+      setUsers(data.users || []);
+      setUsersTotal(data.total || 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load users');
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  const refreshSummary = async () => {
+    const res = await fetch('/api/admin/stats');
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to refresh dashboard');
+    }
+
+    setStats(data.stats);
+    setRevenueChart(data.revenueChart || []);
+  };
+
+  const handleRefresh = async () => {
+    await fetchDashboard();
+  };
+
+  const formatCurrency = (amount: number) => `${amount.toLocaleString('vi-VN')}₫`;
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('vi-VN', {
+    return new Date(dateStr).toLocaleString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -103,33 +217,33 @@ export default function AdminDashboardPage() {
     });
   };
 
-  const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
+  const getStatusBadge = (status: AdminOrder['status']) => {
+    const styles: Record<AdminOrder['status'], string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       paid: 'bg-green-100 text-green-800',
       failed: 'bg-red-100 text-red-800',
       expired: 'bg-gray-100 text-gray-800',
     };
-    const labels: Record<string, string> = {
+
+    const labels: Record<AdminOrder['status'], string> = {
       pending: 'Chờ TT',
       paid: 'Đã TT',
       failed: 'Thất bại',
       expired: 'Hết hạn',
     };
+
     return (
-      <span className={`px-2 py-0.5 rounded text-xs font-medium ${styles[status] || styles.pending}`}>
-        {labels[status] || status}
+      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${styles[status]}`}>
+        {labels[status]}
       </span>
     );
   };
 
-  const handleOrderStatusChange = async (orderId: string, status: RecentOrder['status']) => {
-    const previousOrders = recentOrders;
+  const handleOrderStatusChange = async (orderId: string, status: AdminOrder['status']) => {
+    const previousOrders = orders;
     setSavingOrderId(orderId);
     setError('');
-    setRecentOrders((current) =>
-      current.map((order) => (order.id === orderId ? { ...order, status } : order)),
-    );
+    setOrders((current) => current.map((order) => (order.id === orderId ? { ...order, status } : order)));
 
     try {
       const res = await fetch('/api/admin/orders', {
@@ -145,9 +259,9 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || 'Không thể cập nhật trạng thái đơn hàng');
       }
 
-      await fetchStats();
+      await Promise.all([refreshSummary(), fetchOrdersPage(ordersPage)]);
     } catch (err) {
-      setRecentOrders(previousOrders);
+      setOrders(previousOrders);
       setError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái đơn hàng');
     } finally {
       setSavingOrderId(null);
@@ -155,12 +269,10 @@ export default function AdminDashboardPage() {
   };
 
   const handleUserDisabledChange = async (uid: string, disabled: boolean) => {
-    const previousUsers = recentUsers;
+    const previousUsers = users;
     setSavingUserId(uid);
     setError('');
-    setRecentUsers((current) =>
-      current.map((user) => (user.uid === uid ? { ...user, disabled } : user)),
-    );
+    setUsers((current) => current.map((user) => (user.uid === uid ? { ...user, disabled } : user)));
 
     try {
       const res = await fetch('/api/admin/users', {
@@ -173,201 +285,456 @@ export default function AdminDashboardPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Khong the cap nhat trang thai tai khoan');
+        throw new Error(data.error || 'Không thể cập nhật trạng thái tài khoản');
       }
 
-      await fetchStats();
+      await Promise.all([refreshSummary(), fetchUsersPage(usersPage)]);
     } catch (err) {
-      setRecentUsers(previousUsers);
-      setError(err instanceof Error ? err.message : 'Khong the cap nhat trang thai tai khoan');
+      setUsers(previousUsers);
+      setError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái tài khoản');
     } finally {
       setSavingUserId(null);
     }
   };
 
-  // Simple bar chart using CSS
-  const maxRevenue = Math.max(...revenueChart.map(r => r.revenue), 1);
+  const buildPageNumbers = (totalItems: number, pageSize: number, currentPage: number) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, startPage + 4);
+    const pages: number[] = [];
+
+    for (let page = startPage; page <= endPage; page += 1) {
+      pages.push(page);
+    }
+
+    return { pages, totalPages };
+  };
+
+  const chartData: ChartData<'line'> = {
+    labels: revenueChart.map((point) =>
+      new Date(point.date).toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+      }),
+    ),
+    datasets: [
+      {
+        label: 'Doanh thu',
+        data: revenueChart.map((point) => point.revenue),
+        borderColor: '#2f6b4f',
+        backgroundColor: 'rgba(47, 107, 79, 0.14)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: '#f4efe2',
+        pointBorderColor: '#2f6b4f',
+        pointBorderWidth: 2,
+      },
+    ],
+  };
+
+  const chartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        displayColors: false,
+        backgroundColor: '#1f3d2d',
+        callbacks: {
+          label: (context) => ` ${formatCurrency(Number(context.parsed.y || 0))}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#6b5b45',
+          maxTicksLimit: 8,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(107, 91, 69, 0.12)',
+        },
+        ticks: {
+          color: '#6b5b45',
+          callback: (value) => {
+            const numericValue = Number(value);
+            if (numericValue >= 1000000) return `${(numericValue / 1000000).toFixed(1)}M`;
+            if (numericValue >= 1000) return `${Math.round(numericValue / 1000)}k`;
+            return numericValue.toString();
+          },
+        },
+      },
+    },
+  };
+
+  const ordersPagination = buildPageNumbers(ordersTotal, ORDER_PAGE_SIZE, ordersPage);
+  const usersPagination = buildPageNumbers(usersTotal, USER_PAGE_SIZE, usersPage);
 
   if (authLoading || loading) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-cream">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-main border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-main border-t-transparent" />
           <p className="text-brown-dark">Đang tải dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-cream">
-        <div className="card bg-white p-8 text-center max-w-md">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button onClick={() => { setError(''); setLoading(true); fetchStats(); }} className="btn-primary">
-            Thử lại
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-8 px-4 bg-cream">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="font-heading text-2xl text-green-dark">Admin Dashboard</h1>
-          <button
-            onClick={() => router.push('/profile')}
-            className="text-brown-dark hover:text-green-main text-sm"
-          >
-            ← Hồ sơ
-          </button>
+    <div className="min-h-[calc(100vh-4rem)] bg-cream px-4 py-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.2em] text-brown-dark/70">Back office</p>
+            <h1 className="font-heading text-3xl text-green-dark">Admin Dashboard</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => void handleRefresh()}
+              className="rounded-full border border-border bg-white px-4 py-2 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main"
+            >
+              Làm mới dữ liệu
+            </button>
+            <button
+              onClick={() => router.push('/profile')}
+              className="rounded-full border border-border bg-white px-4 py-2 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main"
+            >
+              ← Hồ sơ
+            </button>
+          </div>
         </div>
 
-        {/* Stats Cards */}
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <div className="card bg-white p-5">
-              <p className="text-brown-dark text-sm mb-1">Tổng người dùng</p>
-              <p className="font-heading text-2xl text-green-dark">{stats.totalUsers}</p>
+              <p className="mb-2 text-sm text-brown-dark">Tổng người dùng</p>
+              <p className="font-heading text-3xl text-green-dark">{stats.totalUsers}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="text-brown-dark text-sm mb-1">Tổng đơn hàng</p>
-              <p className="font-heading text-2xl text-green-dark">{stats.totalOrders}</p>
+              <p className="mb-2 text-sm text-brown-dark">Tổng đơn hàng</p>
+              <p className="font-heading text-3xl text-green-dark">{stats.totalOrders}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="text-brown-dark text-sm mb-1">Doanh thu</p>
-              <p className="font-heading text-2xl text-green-dark">{formatCurrency(stats.totalRevenue)}</p>
+              <p className="mb-2 text-sm text-brown-dark">Tổng doanh thu</p>
+              <p className="font-heading text-3xl text-green-dark">{formatCurrency(stats.totalRevenue)}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="text-brown-dark text-sm mb-1">Lượt truy cập hôm nay</p>
-              <p className="font-heading text-2xl text-green-dark">{stats.todayVisits}</p>
+              <p className="mb-2 text-sm text-brown-dark">Lượt truy cập hôm nay</p>
+              <p className="font-heading text-3xl text-green-dark">{stats.todayVisits}</p>
             </div>
           </div>
         )}
 
-        {/* Revenue Chart */}
-        {revenueChart.length > 0 && (
-          <div className="card bg-white p-6 mb-8">
-            <h2 className="font-heading text-lg text-green-dark mb-4">Doanh thu 30 ngày</h2>
-            <div className="flex items-end gap-px h-40 overflow-x-auto">
-              {revenueChart.map((point) => (
-                <div
-                  key={point.date}
-                  className="flex-1 min-w-[8px] h-full group relative flex items-end"
-                  title={`${point.date}: ${formatCurrency(point.revenue)}`}
-                >
-                  <div
-                    className="bg-green-main hover:bg-green-dark transition-colors rounded-t-sm w-full"
-                    style={{
-                      height: `${Math.max((point.revenue / maxRevenue) * 100, point.revenue > 0 ? 4 : 0)}%`,
-                    }}
-                  />
+        <section className="card overflow-hidden bg-white">
+          <div className="border-b border-border px-6 py-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="font-heading text-xl text-green-dark">Doanh thu 30 ngày</h2>
+                <p className="mt-1 text-sm text-brown-dark">
+                  Theo dõi xu hướng thanh toán theo ngày, dễ nhìn hơn và có tooltip chi tiết.
+                </p>
+              </div>
+              <div className="rounded-2xl bg-cream px-4 py-3 text-sm text-brown-dark">
+                <span className="block text-xs uppercase tracking-[0.18em] text-brown-dark/70">30 ngày gần nhất</span>
+                <span className="font-heading text-lg text-green-dark">
+                  {formatCurrency(revenueChart.reduce((sum, point) => sum + point.revenue, 0))}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="h-[340px] p-6">
+            <Line data={chartData} options={chartOptions} />
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
+          <section className="card overflow-hidden bg-white">
+            <div className="border-b border-border px-6 py-5">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-heading text-xl text-green-dark">Tất cả đơn hàng</h2>
+                  <p className="mt-1 text-sm text-brown-dark">
+                    Hiển thị toàn bộ đơn hàng theo từng trang, thao tác đổi trạng thái ngay tại đây.
+                  </p>
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-between text-xs text-brown-dark mt-2">
-              <span>{revenueChart[0]?.date.slice(5)}</span>
-              <span>{revenueChart[revenueChart.length - 1]?.date.slice(5)}</span>
-            </div>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Orders */}
-          <div className="card bg-white p-6">
-            <h2 className="font-heading text-lg text-green-dark mb-4">Đơn hàng gần đây</h2>
-            {recentOrders.length === 0 ? (
-              <p className="text-brown-dark text-center py-6">Chưa có đơn hàng</p>
-            ) : (
-              <div className="space-y-3">
-                {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between gap-3 p-3 bg-cream-dark rounded-lg">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-mono text-brown-dark truncate">{order.orderCode}</p>
-                      <p className="text-xs text-brown-dark truncate">{order.userEmail}</p>
-                      <p className="text-xs text-brown-dark mt-1">{formatDate(order.createdAt)}</p>
-                    </div>
-                    <div className="text-right ml-3 flex-shrink-0">
-                      <p className="text-sm font-medium text-green-dark">{formatCurrency(order.amount)}</p>
-                      {getStatusBadge(order.status)}
-                    </div>
-                    <div className="flex flex-col gap-2 w-32 flex-shrink-0">
-                      <label className="text-xs text-brown-dark text-left" htmlFor={`order-status-${order.id}`}>
-                        Trạng thái
-                      </label>
-                      <select
-                        id={`order-status-${order.id}`}
-                        className="bg-white border border-border rounded px-2 py-1 text-sm text-brown-dark disabled:opacity-60"
-                        value={order.status}
-                        disabled={savingOrderId === order.id}
-                        onChange={(event) => handleOrderStatusChange(order.id, event.target.value as RecentOrder['status'])}
-                      >
-                        {statusOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      {savingOrderId === order.id && (
-                        <p className="text-[11px] text-brown-dark text-left">Đang lưu...</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                <span className="rounded-full bg-cream px-3 py-1 text-sm text-brown-dark">
+                  {ordersTotal} đơn
+                </span>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Recent Users */}
-          <div className="card bg-white p-6">
-            <h2 className="font-heading text-lg text-green-dark mb-4">Người dùng mới</h2>
-            {recentUsers.length === 0 ? (
-              <p className="text-brown-dark text-center py-6">Chưa có người dùng</p>
-            ) : (
-              <div className="space-y-3">
-                {recentUsers.map((u) => (
-                  <div key={u.uid} className="flex items-center justify-between gap-3 p-3 bg-cream-dark rounded-lg">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 bg-green-dark rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        {(u.displayName || u.email || '?')[0].toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm text-brown-dark truncate">{u.displayName || u.email}</p>
-                        <p className="text-xs text-brown-dark">{formatDate(u.createdAt)}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {u.disabled && (
-                        <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">Da khoa</span>
-                      )}
-                      {u.hasPurchased && (
-                        <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Đã mua</span>
-                      )}
-                      {u.role === 'admin' && (
-                        <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-xs">Admin</span>
-                      )}
-                    </div>
-                    <div className="flex-shrink-0">
-                      <button
-                        onClick={() => handleUserDisabledChange(u.uid, !(u.disabled || false))}
-                        disabled={savingUserId === u.uid || u.role === 'admin'}
-                        className={`px-3 py-1 rounded text-xs font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
-                          u.disabled
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                            : 'bg-red-100 text-red-700 hover:bg-red-200'
-                        }`}
-                      >
-                        {savingUserId === u.uid ? 'Dang luu...' : u.disabled ? 'Kich hoat lai' : 'Huy kich hoat'}
-                      </button>
-                    </div>
-                  </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left">
+                <thead className="bg-cream/70 text-xs uppercase tracking-[0.16em] text-brown-dark/70">
+                  <tr>
+                    <th className="px-6 py-4">Mã đơn</th>
+                    <th className="px-6 py-4">Khách hàng</th>
+                    <th className="px-6 py-4">Số tiền</th>
+                    <th className="px-6 py-4">Trạng thái</th>
+                    <th className="px-6 py-4">Ngày tạo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {ordersLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
+                        Đang tải đơn hàng...
+                      </td>
+                    </tr>
+                  ) : orders.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
+                        Chưa có đơn hàng.
+                      </td>
+                    </tr>
+                  ) : (
+                    orders.map((order) => (
+                      <tr key={order.id} className="align-top">
+                        <td className="px-6 py-4">
+                          <p className="font-mono text-sm text-brown-dark">{order.orderCode}</p>
+                          <p className="mt-1 text-xs text-brown-dark/70">ID: {order.id.slice(0, 8)}...</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm text-brown-dark">{order.userEmail}</p>
+                          <p className="mt-1 text-xs text-brown-dark/70">{order.userId}</p>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-green-dark">
+                          {formatCurrency(order.amount)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-2">
+                            {getStatusBadge(order.status)}
+                            <select
+                              className="block w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-brown-dark disabled:opacity-60"
+                              value={order.status}
+                              disabled={savingOrderId === order.id}
+                              onChange={(event) =>
+                                void handleOrderStatusChange(order.id, event.target.value as AdminOrder['status'])
+                              }
+                            >
+                              {statusOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            {savingOrderId === order.id && (
+                              <p className="text-xs text-brown-dark/70">Đang lưu thay đổi...</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-brown-dark">{formatDate(order.createdAt)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-brown-dark">
+                Trang {ordersPage}/{ordersPagination.totalPages}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setOrdersPage((page) => Math.max(1, page - 1))}
+                  disabled={ordersPage === 1 || ordersLoading}
+                  className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
+                >
+                  Trước
+                </button>
+                {ordersPagination.pages.map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setOrdersPage(page)}
+                    className={`rounded-full px-3 py-1.5 text-sm transition ${
+                      page === ordersPage
+                        ? 'bg-green-dark text-white'
+                        : 'border border-border text-brown-dark hover:border-green-main hover:text-green-main'
+                    }`}
+                  >
+                    {page}
+                  </button>
                 ))}
+                <button
+                  onClick={() => setOrdersPage((page) => Math.min(ordersPagination.totalPages, page + 1))}
+                  disabled={ordersPage === ordersPagination.totalPages || ordersLoading}
+                  className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
+                >
+                  Sau
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          </section>
+
+          <section className="card overflow-hidden bg-white">
+            <div className="border-b border-border px-6 py-5">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="font-heading text-xl text-green-dark">Tất cả người dùng</h2>
+                  <p className="mt-1 text-sm text-brown-dark">
+                    Danh sách người dùng mới nhất theo từng trang, có thể khóa và mở lại tài khoản.
+                  </p>
+                </div>
+                <span className="rounded-full bg-cream px-3 py-1 text-sm text-brown-dark">
+                  {usersTotal} người dùng
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left">
+                <thead className="bg-cream/70 text-xs uppercase tracking-[0.16em] text-brown-dark/70">
+                  <tr>
+                    <th className="px-6 py-4">Người dùng</th>
+                    <th className="px-6 py-4">Vai trò</th>
+                    <th className="px-6 py-4">Trạng thái</th>
+                    <th className="px-6 py-4">Ngày tạo</th>
+                    <th className="px-6 py-4">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {usersLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
+                        Đang tải người dùng...
+                      </td>
+                    </tr>
+                  ) : users.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
+                        Chưa có người dùng.
+                      </td>
+                    </tr>
+                  ) : (
+                    users.map((user) => (
+                      <tr key={user.uid} className="align-top">
+                        <td className="px-6 py-4">
+                          <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-green-dark text-sm font-semibold text-white">
+                              {(user.displayName || user.email || '?')[0].toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-brown-dark">
+                                {user.displayName || 'Chưa đặt tên'}
+                              </p>
+                              <p className="truncate text-sm text-brown-dark/80">{user.email}</p>
+                              <p className="mt-1 truncate text-xs text-brown-dark/60">{user.uid}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-2">
+                            {user.role === 'admin' && (
+                              <span className="rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-800">
+                                Admin
+                              </span>
+                            )}
+                            {user.hasPurchased && (
+                              <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
+                                Đã mua
+                              </span>
+                            )}
+                            {user.role !== 'admin' && !user.hasPurchased && (
+                              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                                User
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {user.disabled ? (
+                            <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                              Đã khóa
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                              Hoạt động
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-brown-dark">{formatDate(user.createdAt)}</td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => void handleUserDisabledChange(user.uid, !(user.disabled || false))}
+                            disabled={savingUserId === user.uid || user.role === 'admin'}
+                            className={`rounded-full px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                              user.disabled
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                : 'bg-red-100 text-red-700 hover:bg-red-200'
+                            }`}
+                          >
+                            {savingUserId === user.uid
+                              ? 'Đang lưu...'
+                              : user.disabled
+                                ? 'Kích hoạt lại'
+                                : 'Hủy kích hoạt'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-brown-dark">
+                Trang {usersPage}/{usersPagination.totalPages}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setUsersPage((page) => Math.max(1, page - 1))}
+                  disabled={usersPage === 1 || usersLoading}
+                  className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
+                >
+                  Trước
+                </button>
+                {usersPagination.pages.map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setUsersPage(page)}
+                    className={`rounded-full px-3 py-1.5 text-sm transition ${
+                      page === usersPage
+                        ? 'bg-green-dark text-white'
+                        : 'border border-border text-brown-dark hover:border-green-main hover:text-green-main'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setUsersPage((page) => Math.min(usersPagination.totalPages, page + 1))}
+                  disabled={usersPage === usersPagination.totalPages || usersLoading}
+                  className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
+                >
+                  Sau
+                </button>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>
