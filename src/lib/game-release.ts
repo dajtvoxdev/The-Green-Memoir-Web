@@ -1,7 +1,7 @@
-export const CURRENT_GAME_FILE_NAME = 'Setup_MoonlitGarden_v0.02.exe';
-export const CURRENT_GAME_VERSION_ID = 'bundled-public-v0.02';
-export const CURRENT_GAME_VERSION_NUMBER = 'v0.02';
-export const CURRENT_GAME_DISPLAY_NAME = 'Moonlit Garden v0.02 Setup';
+export const CURRENT_GAME_FILE_NAME = 'Setup_MoonlitGarden_v0.03.exe';
+export const CURRENT_GAME_VERSION_ID = 'bundled-public-v0.03';
+export const CURRENT_GAME_VERSION_NUMBER = 'v0.03';
+export const CURRENT_GAME_DISPLAY_NAME = 'Moonlit Garden v0.03 Setup';
 export const CURRENT_GAME_TITLE = 'The Green Memoir - Early Access';
 export const CURRENT_GAME_DOWNLOAD_PATH = `/game/${encodeURIComponent(CURRENT_GAME_FILE_NAME)}`;
 
