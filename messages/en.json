@@ -145,6 +145,26 @@
     "hasAccountPrefix": "Already have an account?",
     "loginLinkText": "Login"
   },
+  "forgotPasswordPage": {
+    "description": "Enter your email and we'll send you a password reset link.",
+    "sending": "Sending...",
+    "error": "Unable to send reset email.",
+    "backToLogin": "← Back to login"
+  },
+  "changePassword": {
+    "open": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "saving": "Updating password...",
+    "success": "Password updated successfully. Use the new password on both web and game.",
+    "loginAgain": "Please sign in again before changing your password.",
+    "currentRequired": "Current password is required.",
+    "mismatch": "New password confirmation does not match.",
+    "minLength": "New password must be at least 6 characters.",
+    "wrongPassword": "Current password is incorrect.",
+    "genericError": "Unable to change password right now."
+  },
   "payment": {
     "title": "Payment",
     "order_summary": "Order Summary",

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { getFirebaseAuth } from '@/lib/firebase-client';
 
 interface User {
   uid: string;
@@ -26,12 +27,21 @@ interface Order {
 export default function ProfilePage() {
   const router = useRouter();
   const locale = useLocale();
+  const tCommon = useTranslations('common');
   const tProfile = useTranslations('profile');
   const tPage = useTranslations('profilePage');
+  const tChange = useTranslations('changePassword');
   const { logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   useEffect(() => {
     void fetchUserProfile();
@@ -77,6 +87,71 @@ export default function ProfilePage() {
     }
   };
 
+  const resetPasswordForm = () => {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordError('');
+    setPasswordSuccess('');
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (!currentPassword) {
+      setPasswordError(tChange('currentRequired'));
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError(tChange('minLength'));
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError(tChange('mismatch'));
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const auth = await getFirebaseAuth();
+      const authUser = auth.currentUser;
+
+      if (!authUser?.email) {
+        setPasswordError(tChange('loginAgain'));
+        return;
+      }
+
+      const { EmailAuthProvider, reauthenticateWithCredential, updatePassword } = await import('firebase/auth');
+      const credential = EmailAuthProvider.credential(authUser.email, currentPassword);
+
+      await reauthenticateWithCredential(authUser, credential);
+      await updatePassword(authUser, newPassword);
+
+      resetPasswordForm();
+      setShowChangePassword(false);
+      setPasswordSuccess(tChange('success'));
+    } catch (err: any) {
+      const code = err?.code as string | undefined;
+
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') {
+        setPasswordError(tChange('wrongPassword'));
+      } else if (code === 'auth/weak-password') {
+        setPasswordError(tChange('minLength'));
+      } else if (code === 'auth/requires-recent-login' || code === 'auth/user-token-expired') {
+        setPasswordError(tChange('loginAgain'));
+      } else {
+        setPasswordError(err?.message || tChange('genericError'));
+      }
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   const formatLocalizedDate = (dateString: string | null) => {
     if (!dateString) return '-';
 
@@ -113,7 +188,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-cream px-4 py-12">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-cream px-4 py-12">
         <div className="text-center">
           <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-main border-t-transparent" />
           <p className="text-brown-dark">{tPage('loading')}</p>
@@ -240,9 +315,93 @@ export default function ProfilePage() {
                 <button className="w-full rounded-lg bg-cream-dark px-4 py-3 text-left text-brown-dark transition-colors hover:bg-cream">
                   {tProfile('change_name')}
                 </button>
-                <button className="w-full rounded-lg bg-cream-dark px-4 py-3 text-left text-brown-dark transition-colors hover:bg-cream">
-                  {tProfile('change_password')}
+                <button
+                  onClick={() => {
+                    setShowChangePassword((value) => !value);
+                    setPasswordError('');
+                    setPasswordSuccess('');
+                  }}
+                  className="w-full rounded-lg bg-cream-dark px-4 py-3 text-left text-brown-dark transition-colors hover:bg-cream"
+                >
+                  {tChange('open')}
                 </button>
+
+                {passwordSuccess && (
+                  <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    {passwordSuccess}
+                  </div>
+                )}
+
+                {showChangePassword && (
+                  <form onSubmit={handleChangePassword} className="space-y-4 rounded-lg border border-border bg-cream-dark p-4">
+                    {passwordError && (
+                      <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {passwordError}
+                      </div>
+                    )}
+
+                    <div>
+                      <label htmlFor="currentPassword" className="mb-1 block text-sm font-medium text-brown-dark">
+                        {tChange('currentPassword')}
+                      </label>
+                      <input
+                        id="currentPassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        className="input"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="newPassword" className="mb-1 block text-sm font-medium text-brown-dark">
+                        {tChange('newPassword')}
+                      </label>
+                      <input
+                        id="newPassword"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        className="input"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-brown-dark">
+                        {tChange('confirmPassword')}
+                      </label>
+                      <input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        className="input"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <button type="submit" disabled={passwordLoading} className="btn-primary">
+                        {passwordLoading ? tChange('saving') : tCommon('save')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowChangePassword(false);
+                          resetPasswordForm();
+                        }}
+                        className="rounded-lg border border-border px-4 py-3 text-brown-dark transition-colors hover:bg-white"
+                      >
+                        {tCommon('cancel')}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
                 <button
                   onClick={handleLogout}
                   className="w-full rounded-lg bg-red-50 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-100"
