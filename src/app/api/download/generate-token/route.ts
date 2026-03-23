@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { getWebUser, createDownloadToken, getLatestGameVersion } from '@/lib/firestore';
 import { Timestamp } from 'firebase-admin/firestore';
 import { randomBytes } from 'crypto';
+import { getBundledGameDownload } from '@/lib/game-download';
 
 const DOWNLOAD_TOKEN_EXPIRY_HOURS = parseInt(process.env.DOWNLOAD_TOKEN_EXPIRY_HOURS || '24', 10);
 
@@ -26,9 +27,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get latest game version
-    const version = await getLatestGameVersion();
-    if (!version || !version.isActive) {
+    // Prefer the bundled public build when it exists so download links
+    // automatically track the latest uploaded archive in /public/game.
+    const bundledVersion = getBundledGameDownload();
+    const firestoreVersion = bundledVersion ? null : await getLatestGameVersion();
+    const version = bundledVersion || firestoreVersion;
+
+    if (!version || ('isActive' in version && !version.isActive)) {
       return NextResponse.json(
         { error: 'No game version available for download.' },
         { status: 404 }
@@ -42,7 +47,7 @@ export async function POST(request: NextRequest) {
     const downloadToken = await createDownloadToken({
       userId: user.uid,
       token,
-      versionId: version.id!,
+      versionId: bundledVersion ? bundledVersion.versionId : firestoreVersion!.id!,
       expiresAt: Timestamp.fromDate(
         new Date(Date.now() + DOWNLOAD_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000)
       ),

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDownloadToken, markTokenAsUsed, getGameVersion } from '@/lib/firestore';
+import { getBundledGameDownload } from '@/lib/game-download';
 
 /**
  * Download game file using token
@@ -44,6 +45,13 @@ export async function GET(
       );
     }
 
+    const bundledVersion = getBundledGameDownload();
+
+    if (bundledVersion && downloadToken.versionId === bundledVersion.versionId) {
+      await markTokenAsUsed(downloadToken.id!);
+      return NextResponse.redirect(new URL(bundledVersion.downloadUrl, request.url));
+    }
+
     // Get game version
     const version = await getGameVersion(downloadToken.versionId);
     if (!version) {
@@ -58,7 +66,7 @@ export async function GET(
 
     // Redirect to actual download URL
     // In production, this could be a signed Firebase Storage URL or CDN URL
-    return NextResponse.redirect(version.downloadUrl);
+    return NextResponse.redirect(new URL(version.downloadUrl, request.url));
   } catch (error: any) {
     console.error('Download error:', error);
     return NextResponse.json(
