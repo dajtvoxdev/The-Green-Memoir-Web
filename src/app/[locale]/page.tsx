@@ -1,11 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 
-// Generate metadata
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'hero' });
-  
+
   return {
     title: t('tagline'),
     description: t('subtitle'),
@@ -14,28 +13,59 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function LandingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  
-  // For client-side translations, we'd use useTranslations
-  // But since this is a server component, we'll use the messages directly
-  // In a real app, you'd fetch translations properly
-  
+  const tHero = await getTranslations({ locale, namespace: 'hero' });
+  const tFeatures = await getTranslations({ locale, namespace: 'features' });
+  const tLanding = await getTranslations({ locale, namespace: 'landing' });
+  const tPricing = await getTranslations({ locale, namespace: 'pricing' });
+
+  const featureItems = [
+    { icon: '🌾', title: tFeatures('farming.title'), desc: tFeatures('farming.desc') },
+    { icon: '🇻🇳', title: tFeatures('culture.title'), desc: tFeatures('culture.desc') },
+    { icon: '👨‍🌾', title: tFeatures('character.title'), desc: tFeatures('character.desc') },
+    { icon: '🌅', title: tFeatures('daynight.title'), desc: tFeatures('daynight.desc') },
+    { icon: '💰', title: tFeatures('economy.title'), desc: tFeatures('economy.desc') },
+    { icon: '☁️', title: tFeatures('cloudsave.title'), desc: tFeatures('cloudsave.desc') },
+  ];
+
+  const roadmapItems = [
+    { date: 'Q1 2026', version: 'v0.1.0', title: tLanding('timeline.launch'), status: 'done' },
+    { date: 'Q2 2026', version: 'v0.2.0', title: tLanding('timeline.crops'), status: 'current' },
+    { date: 'Q3 2026', version: 'v0.3.0', title: tLanding('timeline.coop'), status: 'planned' },
+    { date: 'Q4 2026', version: 'v1.0.0', title: tLanding('timeline.release'), status: 'planned' },
+  ] as const;
+
+  const minimumSpecs = [
+    ['OS', 'Windows 10 64-bit'],
+    ['CPU', 'Intel Core i3-2100'],
+    ['RAM', '4 GB'],
+    ['GPU', 'NVIDIA GTX 660'],
+    ['Storage', '1 GB'],
+  ];
+
+  const recommendedSpecs = [
+    ['OS', 'Windows 11 64-bit'],
+    ['CPU', 'Intel Core i5-6600'],
+    ['RAM', '8 GB'],
+    ['GPU', 'NVIDIA GTX 1060'],
+    ['Storage', '1 GB SSD'],
+  ];
+
   return (
     <div className="flex flex-col">
-      {/* Section 1: Hero */}
-      <section className="relative min-h-screen flex items-center justify-center bg-green-pale overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10" 
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-green-pale">
+        <div
+          className="absolute inset-0 opacity-10"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232D5A27' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundImage:
+              'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%232D5A27\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
           }}
         />
-        
-        {/* Floating leaves animation */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(10)].map((_, i) => (
+
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {[...Array(10)].map((_, index) => (
             <div
-              key={i}
-              className="absolute w-4 h-4 bg-green-light rounded-full opacity-30 animate-float"
+              key={index}
+              className="absolute h-4 w-4 animate-float rounded-full bg-green-light opacity-30"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -47,61 +77,48 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         </div>
 
         <div className="relative z-10 container mx-auto px-4 text-center">
-          {/* Logo */}
           <div className="mb-8 animate-glow">
             <img
               src="/images/logo.png"
               alt="The Green Memoir"
-              className="w-48 h-48 md:w-72 md:h-72 mx-auto object-contain"
+              className="mx-auto h-48 w-48 object-contain md:h-72 md:w-72"
             />
           </div>
 
-          {/* Tagline */}
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-green-dark mb-4">
-            Ký ức xanh của miền quê Việt Nam
+          <h1 className="mb-4 font-display text-4xl text-green-dark md:text-6xl lg:text-7xl">
+            {tHero('tagline')}
           </h1>
 
-          {/* Subtitle */}
-          <p className="font-body text-lg md:text-xl text-brown-dark mb-8 max-w-2xl mx-auto">
-            Game nông trại 2D với văn hóa Việt Nam
+          <p className="mx-auto mb-8 max-w-2xl font-body text-lg text-brown-dark md:text-xl">
+            {tHero('subtitle')}
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+          <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/purchase" className="btn-primary text-lg">
-              Mua Game — 49,000₫
+              {tHero('cta_primary')}
             </Link>
-            <a 
-              href="#trailer" 
-              className="btn-secondary text-lg"
-            >
-              Xem Trailer ▶
+            <a href="#trailer" className="btn-secondary text-lg">
+              {tHero('cta_secondary')}
             </a>
           </div>
 
-          {/* Platform info */}
-          <p className="text-sm text-brown-dark/70">
-            Hỗ trợ Windows 10/11 | Early Access
-          </p>
+          <p className="text-sm text-brown-dark/70">{tHero('platform')}</p>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <svg className="w-6 h-6 text-green-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce transform">
+          <svg className="h-6 w-6 text-green-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </div>
       </section>
 
-      {/* Section 2: Trailer */}
-      <section id="trailer" className="py-20 bg-cream-dark">
+      <section id="trailer" className="bg-cream-dark py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            {/* Video container with wooden frame */}
+          <div className="mx-auto max-w-4xl">
             <div className="relative border-4 border-brown-dark bg-brown-light p-2">
               <div className="aspect-video bg-black">
                 <iframe
-                  className="w-full h-full"
+                  className="h-full w-full"
                   src="https://www.youtube.com/embed/placeholder"
                   title="The Green Memoir Trailer"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -109,221 +126,149 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
                 />
               </div>
             </div>
-            
-            {/* Description */}
-            <p className="mt-6 text-center text-brown-dark text-lg">
-              Trải nghiệm cuộc sống nông thôn Việt Nam qua góc nhìn pixel art đầy màu sắc. 
-              Trồng trọt, chăn nuôi, và khám phá những câu chuyện ấm áp của miền quê.
-            </p>
+
+            <p className="mt-6 text-center text-lg text-brown-dark">{tLanding('trailerDescription')}</p>
           </div>
         </div>
       </section>
 
-      {/* Section 3: Screenshots */}
-      <section className="py-20 bg-green-pale">
+      <section className="bg-green-pale py-20">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-3xl md:text-4xl text-center text-green-dark mb-12">
-            Hình Ảnh Game
+          <h2 className="mb-12 text-center font-display text-3xl text-green-dark md:text-4xl">
+            {tLanding('screenshots')}
           </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
-            {[1, 2, 3, 4].map((i) => (
-              <div 
-                key={i}
-                className="relative aspect-video border-4 border-brown-dark bg-brown-light overflow-hidden group"
+
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2">
+            {[1, 2, 3, 4].map((index) => (
+              <div
+                key={index}
+                className="group relative aspect-video overflow-hidden border-4 border-brown-dark bg-brown-light"
               >
                 <img
-                  src={`/images/screenshot-${i}.png`}
-                  alt={`Screenshot ${i}`}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  src={`/images/screenshot-${index}.png`}
+                  alt={`Screenshot ${index}`}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Section 4: Features */}
-      <section id="features" className="py-20 bg-cream">
+      <section id="features" className="bg-cream py-20">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-3xl md:text-4xl text-center text-green-dark mb-4">
-            Tính Năng Nổi Bật
+          <h2 className="mb-4 text-center font-display text-3xl text-green-dark md:text-4xl">
+            {tFeatures('title')}
           </h2>
-          <p className="text-center text-brown-dark mb-12 max-w-2xl mx-auto">
-            Khám phá những điều đặc biệt làm nên The Green Memoir
+          <p className="mx-auto mb-12 max-w-2xl text-center text-brown-dark">
+            {tLanding('featuresSubtitle')}
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {/* Feature cards */}
-            {[
-              { icon: '🌾', title: 'Trồng Trọt', desc: 'Trồng và chăm sóc cây trồng đặc trưng Việt Nam' },
-              { icon: '🇻🇳', title: 'Văn Hóa VN', desc: 'Khám phá văn hóa và phong cảnh Việt Nam' },
-              { icon: '👨‍🌾', title: 'Nhân Vật', desc: 'Hóa thân thành nông dân với trang phục truyền thống' },
-              { icon: '🌅', title: 'Ngày Đêm', desc: 'Chu kỳ ngày đêm và thời tiết thay đổi' },
-              { icon: '💰', title: 'Kinh Tế', desc: 'Xây dựng và phát triển nông trại thịnh vượng' },
-              { icon: '☁️', title: 'Cloud Save', desc: 'Lưu tiến độ tự động trên đám mây' },
-            ].map((feature, i) => (
-              <div 
-                key={i}
-                className="card bg-white p-6 text-center hover:shadow-lg transition-shadow"
-              >
-                <div className="text-5xl mb-4">{feature.icon}</div>
-                <h3 className="font-heading text-xl text-green-dark mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-brown-dark/80">
-                  {feature.desc}
-                </p>
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {featureItems.map((feature) => (
+              <div key={feature.title} className="card bg-white p-6 text-center transition-shadow hover:shadow-lg">
+                <div className="mb-4 text-5xl">{feature.icon}</div>
+                <h3 className="mb-2 font-heading text-xl text-green-dark">{feature.title}</h3>
+                <p className="text-brown-dark/80">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Section 5: System Requirements */}
-      <section className="py-20 bg-cream-dark">
+      <section className="bg-cream-dark py-20">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-3xl md:text-4xl text-center text-green-dark mb-12">
-            Cấu Hình Yêu Cầu
+          <h2 className="mb-12 text-center font-display text-3xl text-green-dark md:text-4xl">
+            {tLanding('systemRequirements')}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Minimum */}
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
             <div className="card bg-white p-6">
-              <h3 className="font-heading text-2xl text-green-dark mb-4 text-center">
-                Tối Thiểu
-              </h3>
+              <h3 className="mb-4 text-center font-heading text-2xl text-green-dark">{tLanding('minimum')}</h3>
               <ul className="space-y-3 text-brown-dark">
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>OS</span>
-                  <span className="font-medium">Windows 10 64-bit</span>
-                </li>
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>CPU</span>
-                  <span className="font-medium">Intel Core i3-2100</span>
-                </li>
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>RAM</span>
-                  <span className="font-medium">4 GB</span>
-                </li>
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>GPU</span>
-                  <span className="font-medium">NVIDIA GTX 660</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Storage</span>
-                  <span className="font-medium">1 GB</span>
-                </li>
+                {minimumSpecs.map(([label, value], index) => (
+                  <li key={label} className={`flex justify-between ${index < minimumSpecs.length - 1 ? 'border-b border-border pb-2' : ''}`}>
+                    <span>{label}</span>
+                    <span className="font-medium">{value}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Recommended */}
-            <div className="card bg-white p-6 border-green-main">
-              <h3 className="font-heading text-2xl text-green-dark mb-4 text-center">
-                Khuyến Nghị
-              </h3>
+            <div className="card border-green-main bg-white p-6">
+              <h3 className="mb-4 text-center font-heading text-2xl text-green-dark">{tLanding('recommended')}</h3>
               <ul className="space-y-3 text-brown-dark">
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>OS</span>
-                  <span className="font-medium">Windows 11 64-bit</span>
-                </li>
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>CPU</span>
-                  <span className="font-medium">Intel Core i5-6600</span>
-                </li>
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>RAM</span>
-                  <span className="font-medium">8 GB</span>
-                </li>
-                <li className="flex justify-between border-b border-border pb-2">
-                  <span>GPU</span>
-                  <span className="font-medium">NVIDIA GTX 1060</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Storage</span>
-                  <span className="font-medium">1 GB SSD</span>
-                </li>
+                {recommendedSpecs.map(([label, value], index) => (
+                  <li key={label} className={`flex justify-between ${index < recommendedSpecs.length - 1 ? 'border-b border-border pb-2' : ''}`}>
+                    <span>{label}</span>
+                    <span className="font-medium">{value}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section 6: Roadmap */}
-      <section className="py-20 bg-green-pale">
+      <section className="bg-green-pale py-20">
         <div className="container mx-auto px-4">
-          <h2 className="font-display text-3xl md:text-4xl text-center text-green-dark mb-12">
-            Lộ Trình Phát Triển
+          <h2 className="mb-12 text-center font-display text-3xl text-green-dark md:text-4xl">
+            {tLanding('roadmap')}
           </h2>
 
-          <div className="relative max-w-3xl mx-auto">
-            {/* Timeline line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-green-main" />
+          <div className="relative mx-auto max-w-3xl">
+            <div className="absolute left-1/2 h-full w-1 -translate-x-1/2 transform bg-green-main" />
 
-            {/* Timeline items */}
-            {[
-              { date: 'Q1 2026', version: 'v0.1.0', title: 'Early Access Launch', status: 'done' },
-              { date: 'Q2 2026', version: 'v0.2.0', title: 'New Crops & Animals', status: 'current' },
-              { date: 'Q3 2026', version: 'v0.3.0', title: 'Multiplayer Co-op', status: 'planned' },
-              { date: 'Q4 2026', version: 'v1.0.0', title: 'Full Release', status: 'planned' },
-            ].map((item, i) => (
-              <div 
-                key={i}
-                className={`relative flex items-center mb-8 ${i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
+            {roadmapItems.map((item, index) => (
+              <div
+                key={`${item.date}-${item.version}`}
+                className={`relative mb-8 flex items-center ${index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
               >
-                <div className={`w-1/2 ${i % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}>
-                  <div className="inline-block card bg-white p-4">
-                    <span className="text-sm text-green-main font-medium">{item.date}</span>
+                <div className={`w-1/2 ${index % 2 === 0 ? 'pr-8 text-right' : 'pl-8 text-left'}`}>
+                  <div className="card inline-block bg-white p-4">
+                    <span className="text-sm font-medium text-green-main">{item.date}</span>
                     <h3 className="font-heading text-lg text-green-dark">{item.title}</h3>
                     <span className="text-xs text-brown-dark/60">{item.version}</span>
                   </div>
                 </div>
-                
-                {/* Dot */}
-                <div className={`absolute left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full border-2 border-brown-dark ${
-                  item.status === 'done' ? 'bg-green-dark' : 
-                  item.status === 'current' ? 'bg-green-main animate-pulse' : 'bg-cream'
-                }`} />
+
+                <div
+                  className={`absolute left-1/2 h-4 w-4 -translate-x-1/2 transform rounded-full border-2 border-brown-dark ${
+                    item.status === 'done'
+                      ? 'bg-green-dark'
+                      : item.status === 'current'
+                        ? 'animate-pulse bg-green-main'
+                        : 'bg-cream'
+                  }`}
+                />
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Section 7: CTA */}
-      <section className="py-20 bg-cream">
+      <section className="bg-cream py-20">
         <div className="container mx-auto px-4">
-          <div className="card bg-white max-w-2xl mx-auto p-8 text-center">
-            <img
-              src="/images/logo.png"
-              alt="The Green Memoir"
-              className="w-24 h-24 mx-auto mb-6"
-            />
-            <h2 className="font-display text-3xl text-green-dark mb-2">
-              Sở Hữu Game Ngay
-            </h2>
-            <p className="text-4xl font-bold text-gold mb-6">
-              49,000₫
-            </p>
-            <Link 
-              href="/purchase" 
-              className="btn-primary text-lg inline-block"
-            >
-              Mua Ngay
+          <div className="card mx-auto max-w-2xl bg-white p-8 text-center">
+            <img src="/images/logo.png" alt="The Green Memoir" className="mx-auto mb-6 h-24 w-24" />
+            <h2 className="mb-2 font-display text-3xl text-green-dark">{tLanding('ctaTitle')}</h2>
+            <p className="mb-6 text-4xl font-bold text-gold">{tPricing('price')}</p>
+            <Link href="/purchase" className="btn-primary inline-block text-lg">
+              {tPricing('cta')}
             </Link>
             <div className="mt-6 flex justify-center gap-6 text-sm text-brown-dark/70">
               <span className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-main" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-5 w-5 text-green-main" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                Thanh toán an toàn
+                {tPricing('trust.secure')}
               </span>
               <span className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-main" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-5 w-5 text-green-main" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                Cập nhật miễn phí
+                {tPricing('trust.updates')}
               </span>
             </div>
           </div>

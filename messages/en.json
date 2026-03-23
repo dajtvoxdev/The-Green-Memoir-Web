@@ -41,6 +41,7 @@
   },
   "features": {
     "title": "Key Features",
+    "subtitle": "Discover what makes The Green Memoir feel special",
     "farming": {
       "title": "Farming",
       "desc": "Plant and care for traditional Vietnamese crops"
@@ -64,6 +65,22 @@
     "cloudsave": {
       "title": "Cloud Save",
       "desc": "Auto-save progress to the cloud"
+    }
+  },
+  "landing": {
+    "screenshots": "Game Screenshots",
+    "trailerDescription": "Experience the warmth of Vietnamese countryside life through vibrant pixel art. Farm, raise animals, and uncover heartfelt rural stories.",
+    "featuresSubtitle": "Discover what makes The Green Memoir feel special",
+    "systemRequirements": "System Requirements",
+    "minimum": "Minimum",
+    "recommended": "Recommended",
+    "roadmap": "Development Roadmap",
+    "ctaTitle": "Own The Game Today",
+    "timeline": {
+      "launch": "Early Access Launch",
+      "crops": "New Crops & Animals",
+      "coop": "Multiplayer Co-op",
+      "release": "Full Release"
     }
   },
   "pricing": {
@@ -103,6 +120,31 @@
       "success": "Sent! Check your email inbox."
     }
   },
+  "authPage": {
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "••••••••",
+    "divider": "or",
+    "loginError": "Login failed. Please try again.",
+    "googleLoginError": "Google login failed.",
+    "registerError": "Registration failed. Please try again.",
+    "googleRegisterError": "Google sign-up failed.",
+    "passwordMismatch": "Password confirmation does not match.",
+    "passwordMin": "Password must be at least 6 characters.",
+    "emailInUse": "This email is already registered.",
+    "invalidEmail": "Invalid email address.",
+    "weakPassword": "Password is too weak.",
+    "displayNameOptional": "Display Name",
+    "optional": "(optional)",
+    "displayNamePlaceholder": "Your name",
+    "passwordHint": "At least 6 characters",
+    "loginLoading": "Signing in...",
+    "registerLoading": "Creating account..."
+    ,
+    "noAccountPrefix": "No account?",
+    "registerLinkText": "Register",
+    "hasAccountPrefix": "Already have an account?",
+    "loginLinkText": "Login"
+  },
   "payment": {
     "title": "Payment",
     "order_summary": "Order Summary",
@@ -131,6 +173,29 @@
     "try_again": "Try Again",
     "download_now": "Download Now"
   },
+  "paymentPage": {
+    "createOrderError": "Unable to create order",
+    "successTitle": "Payment successful!",
+    "successDescription": "Thank you for purchasing the game. You can download it right away.",
+    "expiredTitle": "Order expired",
+    "expiredDescription": "Your payment window has expired. Please try again.",
+    "retry": "Try again",
+    "orderSummary": "Order Summary",
+    "processing": "Processing...",
+    "payNowPrice": "Pay 49,000₫",
+    "goBack": "← Back",
+    "qrTitle": "Scan QR to Pay",
+    "qrDescription": "Transfer via bank with the exact transfer note",
+    "bank": "Bank:",
+    "accountNumber": "Account Number:",
+    "accountHolder": "Account Holder:",
+    "amount": "Amount:",
+    "transferContent": "Transfer Note:",
+    "remaining": "Remaining:",
+    "waiting": "Waiting for payment...",
+    "confirmPaid": "I Have Paid",
+    "cancel": "Cancel"
+  },
   "profile": {
     "title": "Profile",
     "member_since": "Member since",
@@ -145,6 +210,22 @@
     "order_code": "Order Code",
     "amount": "Amount",
     "status": "Status"
+  },
+  "profilePage": {
+    "loading": "Loading profile...",
+    "default_name": "User",
+    "admin_link": "Admin →",
+    "owned_game": "Owned Game",
+    "buy_game": "Buy Game",
+    "version": "Version: {version}",
+    "download_now": "Download",
+    "buy_now": "Buy now",
+    "no_transactions": "No transactions yet",
+    "logout": "Logout",
+    "status_pending": "Pending payment",
+    "status_paid": "Paid",
+    "status_failed": "Failed",
+    "status_expired": "Expired"
   },
   "download": {
     "title": "Download Game",
@@ -172,6 +253,83 @@
       "total_orders": "Total Orders",
       "today_visits": "Today's Visits"
     }
+  },
+  "downloadPage": {
+    "generateError": "Unable to generate download link",
+    "preparing": "Preparing your download...",
+    "errorTitle": "Error",
+    "retry": "Try again",
+    "downloading": "Downloading...",
+    "downloadWindows": "Download for Windows",
+    "installationTitle": "Installation Instructions",
+    "steps": {
+      "extractTitle": "Extract",
+      "extractDesc": "Extract the downloaded ZIP file",
+      "installTitle": "Install",
+      "installDesc": "Run the .exe file to install the game",
+      "loginTitle": "Login",
+      "loginDesc": "Sign in with your registered account",
+      "playTitle": "Play!",
+      "playDesc": "Start your adventure"
+    }
+  },
+  "layoutMeta": {
+    "defaultTitle": "The Green Memoir - 2D Vietnamese Farming Game",
+    "description": "A 2D farming game inspired by Vietnamese culture. Farm, explore, and build your own countryside story.",
+    "openGraphDescription": "Green memories from the Vietnamese countryside"
+  },
+  "adminDashboard": {
+    "backOffice": "Back office",
+    "title": "Admin Dashboard",
+    "loading": "Loading dashboard...",
+    "refresh": "Refresh data",
+    "backToProfile": "← Profile",
+    "totalUsers": "Total users",
+    "totalOrders": "Total orders",
+    "totalRevenue": "Total revenue",
+    "todayVisits": "Today's visits",
+    "revenue30Days": "30-day revenue",
+    "revenueDescription": "Track daily payment trends with a clearer chart and detailed tooltip.",
+    "last30Days": "Last 30 days",
+    "ordersTab": "Orders",
+    "usersTab": "Users",
+    "allOrders": "All orders",
+    "allOrdersDescription": "Browse the full order list page by page and update statuses directly here.",
+    "ordersCount": "{count} orders",
+    "orderCode": "Order code",
+    "customer": "Customer",
+    "amount": "Amount",
+    "status": "Status",
+    "createdAt": "Created at",
+    "loadingOrders": "Loading orders...",
+    "noOrders": "No orders yet.",
+    "savingChanges": "Saving changes...",
+    "previous": "Previous",
+    "next": "Next",
+    "allUsers": "All users",
+    "allUsersDescription": "Browse the latest users page by page and disable or reactivate accounts.",
+    "usersCount": "{count} users",
+    "user": "User",
+    "role": "Role",
+    "accountStatus": "Account status",
+    "action": "Action",
+    "loadingUsers": "Loading users...",
+    "noUsers": "No users yet.",
+    "unnamed": "Unnamed",
+    "purchased": "Purchased",
+    "locked": "Locked",
+    "active": "Active",
+    "saving": "Saving...",
+    "reactivate": "Reactivate",
+    "deactivate": "Deactivate",
+    "pageLabel": "Page {current}/{total}",
+    "status_pending": "Pending",
+    "status_paid": "Paid",
+    "status_failed": "Failed",
+    "status_expired": "Expired",
+    "updateOrderError": "Unable to update order status",
+    "updateUserError": "Unable to update account status",
+    "revenueSeries": "Revenue"
   },
   "footer": {
     "description": "2D Farming Game with Vietnamese Culture",

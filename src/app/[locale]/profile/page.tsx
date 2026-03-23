@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface User {
   uid: string;
@@ -23,6 +25,10 @@ interface Order {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const locale = useLocale();
+  const tProfile = useTranslations('profile');
+  const tPage = useTranslations('profilePage');
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -33,7 +39,7 @@ export default function ProfilePage() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch('/api/auth/me');
+      const response = await fetch('/api/auth/me', { cache: 'no-store' });
       if (!response.ok) {
         router.push('/login');
         return;
@@ -64,17 +70,17 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/session', { method: 'DELETE' });
+      await logout();
       router.push('/');
     } catch (err) {
       console.error('Logout error:', err);
     }
   };
 
-  const formatDate = (dateString: string | null) => {
+  const formatLocalizedDate = (dateString: string | null) => {
     if (!dateString) return '-';
 
-    return new Date(dateString).toLocaleDateString('vi-VN', {
+    return new Date(dateString).toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -92,10 +98,10 @@ export default function ProfilePage() {
     };
 
     const labels: Record<string, string> = {
-      pending: 'Chờ thanh toán',
-      paid: 'Đã thanh toán',
-      failed: 'Thất bại',
-      expired: 'Hết hạn',
+      pending: tPage('status_pending'),
+      paid: tPage('status_paid'),
+      failed: tPage('status_failed'),
+      expired: tPage('status_expired'),
     };
 
     return (
@@ -110,7 +116,7 @@ export default function ProfilePage() {
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-cream px-4 py-12">
         <div className="text-center">
           <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-main border-t-transparent" />
-          <p className="text-brown-dark">Đang tải hồ sơ...</p>
+          <p className="text-brown-dark">{tPage('loading')}</p>
         </div>
       </div>
     );
@@ -130,24 +136,26 @@ export default function ProfilePage() {
                 {(user.displayName || user.email || 'U')[0].toUpperCase()}
               </div>
               <h2 className="mb-1 font-heading text-xl text-green-dark">
-                {user.displayName || 'User'}
+                {user.displayName || tPage('default_name')}
               </h2>
               <p className="mb-4 text-sm text-brown-dark">{user.email}</p>
 
               <div className="mb-4">
                 {user.hasPurchased ? (
                   <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-                    ✓ Đã mua
+                    {`✓ ${tProfile('purchased')}`}
                   </span>
                 ) : (
                   <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
-                    Chưa mua
+                    {tProfile('not_purchased')}
                   </span>
                 )}
               </div>
 
               {user.createdAt && (
-                <p className="text-xs text-brown-dark">Thành viên từ {formatDate(user.createdAt)}</p>
+                <p className="text-xs text-brown-dark">
+                  {tProfile('member_since')} {formatLocalizedDate(user.createdAt)}
+                </p>
               )}
 
               {user.role === 'admin' && (
@@ -155,7 +163,7 @@ export default function ProfilePage() {
                   href="/admin/dashboard"
                   className="mt-4 inline-block text-sm font-medium text-green-main hover:text-green-dark"
                 >
-                  Quản Trị →
+                  {tPage('admin_link')}
                 </Link>
               )}
             </div>
@@ -164,7 +172,7 @@ export default function ProfilePage() {
           <div className="space-y-6 md:col-span-3">
             <div className="card bg-white p-6">
               <h3 className="mb-4 font-heading text-xl text-green-dark">
-                {user.hasPurchased ? 'Game đã mua' : 'Mua game'}
+                {user.hasPurchased ? tPage('owned_game') : tPage('buy_game')}
               </h3>
               <div className="flex items-center gap-4 rounded-lg bg-cream-dark p-4">
                 <img
@@ -174,7 +182,7 @@ export default function ProfilePage() {
                 />
                 <div className="flex-1">
                   <h4 className="font-heading text-lg text-green-dark">The Green Memoir - Early Access</h4>
-                  <p className="text-sm text-brown-dark">Phiên bản: v0.1.0-alpha</p>
+                  <p className="text-sm text-brown-dark">{tPage('version', { version: 'v0.1.0-alpha' })}</p>
                 </div>
                 <div>
                   {user.hasPurchased ? (
@@ -182,14 +190,14 @@ export default function ProfilePage() {
                       onClick={() => router.push('/download')}
                       className="btn-primary"
                     >
-                      Tải về
+                      {tPage('download_now')}
                     </button>
                   ) : (
                     <button
                       onClick={() => router.push('/purchase')}
                       className="btn-primary"
                     >
-                      Mua ngay
+                      {tPage('buy_now')}
                     </button>
                   )}
                 </div>
@@ -197,24 +205,24 @@ export default function ProfilePage() {
             </div>
 
             <div className="card bg-white p-6">
-              <h3 className="mb-4 font-heading text-xl text-green-dark">Lịch sử giao dịch</h3>
+              <h3 className="mb-4 font-heading text-xl text-green-dark">{tProfile('transactions')}</h3>
               {orders.length === 0 ? (
-                <p className="py-8 text-center text-brown-dark">Chưa có giao dịch nào</p>
+                <p className="py-8 text-center text-brown-dark">{tPage('no_transactions')}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b-2 border-border">
-                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Ngày</th>
-                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Mã đơn</th>
-                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Số tiền</th>
-                        <th className="px-4 py-3 text-left font-medium text-brown-dark">Trạng thái</th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">{tProfile('date')}</th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">{tProfile('order_code')}</th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">{tProfile('amount')}</th>
+                        <th className="px-4 py-3 text-left font-medium text-brown-dark">{tProfile('status')}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {orders.map((order) => (
                         <tr key={order.id} className="border-b border-border">
-                          <td className="px-4 py-3 text-brown-dark">{formatDate(order.createdAt)}</td>
+                          <td className="px-4 py-3 text-brown-dark">{formatLocalizedDate(order.createdAt)}</td>
                           <td className="px-4 py-3 font-mono text-sm text-brown-dark">{order.orderCode}</td>
                           <td className="px-4 py-3 text-brown-dark">{formatCurrency(order.amount)}</td>
                           <td className="px-4 py-3">{getStatusBadge(order.status)}</td>
@@ -227,19 +235,19 @@ export default function ProfilePage() {
             </div>
 
             <div className="card bg-white p-6">
-              <h3 className="mb-4 font-heading text-xl text-green-dark">Cài đặt</h3>
+              <h3 className="mb-4 font-heading text-xl text-green-dark">{tProfile('settings')}</h3>
               <div className="space-y-4">
                 <button className="w-full rounded-lg bg-cream-dark px-4 py-3 text-left text-brown-dark transition-colors hover:bg-cream">
-                  Đổi tên hiển thị
+                  {tProfile('change_name')}
                 </button>
                 <button className="w-full rounded-lg bg-cream-dark px-4 py-3 text-left text-brown-dark transition-colors hover:bg-cream">
-                  Đổi mật khẩu
+                  {tProfile('change_password')}
                 </button>
                 <button
                   onClick={handleLogout}
                   className="w-full rounded-lg bg-red-50 px-4 py-3 text-left text-red-600 transition-colors hover:bg-red-100"
                 >
-                  Đăng xuất
+                  {tPage('logout')}
                 </button>
               </div>
             </div>

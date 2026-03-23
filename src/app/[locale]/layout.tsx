@@ -1,5 +1,5 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/index';
 import Header from '@/components/layout/Header';
@@ -7,7 +7,6 @@ import Footer from '@/components/layout/Footer';
 import { AuthProvider } from '@/contexts/AuthContext';
 import '../globals.css';
 
-// Google Fonts
 import { Nunito, Playfair_Display } from 'next/font/google';
 
 const nunito = Nunito({
@@ -22,20 +21,25 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
-// Metadata
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'layoutMeta' });
+  const keywords =
+    locale === 'vi'
+      ? ['game', 'nông trại', 'việt nam', '2d', 'pixel art']
+      : ['game', 'farming', 'vietnam', '2d', 'pixel art'];
+
   return {
     title: {
-      default: 'The Green Memoir - Game Nông Trại 2D Việt Nam',
+      default: t('defaultTitle'),
       template: '%s | The Green Memoir',
     },
-    description: 'Game nông trại 2D với văn hóa Việt Nam. Trồng trọt, khám phá và xây dựng nông trại của riêng bạn.',
-    keywords: ['game', 'farming', 'vietnam', '2d', 'pixel art', 'nông trại', 'việt nam'],
+    description: t('description'),
+    keywords,
     authors: [{ name: 'Moonlit Garden' }],
     openGraph: {
       title: 'The Green Memoir',
-      description: 'Ký ức xanh của miền quê Việt Nam',
+      description: t('openGraphDescription'),
       images: ['/images/og-image.png'],
     },
   };
@@ -53,34 +57,24 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  
-  // Validate locale
-  if (!locales.includes(locale as any)) {
+
+  if (!locales.includes(locale as (typeof locales)[number])) {
     notFound();
   }
-  
-  // Enable static rendering
+
   setRequestLocale(locale);
-  
-  // Get messages for the locale
   const messages = await getMessages();
 
   return (
     <html lang={locale} className={`${nunito.variable} ${playfair.variable}`}>
       <head>
-        {/* Cherry Bomb One for display text */}
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" 
-          rel="stylesheet" 
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-screen flex flex-col font-body">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             <Header />
-            <main className="flex-1 pt-16">
-              {children}
-            </main>
+            <main className="flex-1 pt-16">{children}</main>
             <Footer />
           </AuthProvider>
         </NextIntlClientProvider>

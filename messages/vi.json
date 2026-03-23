@@ -66,6 +66,22 @@
       "desc": "Lưu tiến độ tự động trên đám mây"
     }
   },
+  "landing": {
+    "screenshots": "Hình Ảnh Game",
+    "trailerDescription": "Trải nghiệm cuộc sống nông thôn Việt Nam qua góc nhìn pixel art đầy màu sắc. Trồng trọt, chăn nuôi, và khám phá những câu chuyện ấm áp của miền quê.",
+    "featuresSubtitle": "Khám phá những điều đặc biệt làm nên The Green Memoir",
+    "systemRequirements": "Cấu Hình Yêu Cầu",
+    "minimum": "Tối Thiểu",
+    "recommended": "Khuyến Nghị",
+    "roadmap": "Lộ Trình Phát Triển",
+    "ctaTitle": "Sở Hữu Game Ngay",
+    "timeline": {
+      "launch": "Early Access Launch",
+      "crops": "New Crops & Animals",
+      "coop": "Multiplayer Co-op",
+      "release": "Full Release"
+    }
+  },
   "pricing": {
     "title": "Sở Hữu Game Ngay",
     "price": "49,000₫",
@@ -103,6 +119,30 @@
       "success": "Đã gửi! Kiểm tra hộp thư email."
     }
   },
+  "authPage": {
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "••••••••",
+    "divider": "hoặc",
+    "loginError": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "googleLoginError": "Đăng nhập với Google thất bại.",
+    "registerError": "Đăng ký thất bại. Vui lòng thử lại.",
+    "googleRegisterError": "Đăng ký với Google thất bại.",
+    "passwordMismatch": "Mật khẩu xác nhận không khớp.",
+    "passwordMin": "Mật khẩu phải có ít nhất 6 ký tự.",
+    "emailInUse": "Email này đã được đăng ký.",
+    "invalidEmail": "Email không hợp lệ.",
+    "weakPassword": "Mật khẩu quá yếu.",
+    "displayNameOptional": "Tên hiển thị",
+    "optional": "(tùy chọn)",
+    "displayNamePlaceholder": "Tên của bạn",
+    "passwordHint": "Ít nhất 6 ký tự",
+    "loginLoading": "Đang đăng nhập...",
+    "registerLoading": "Đang tạo tài khoản...",
+    "noAccountPrefix": "Chưa có tài khoản?",
+    "registerLinkText": "Đăng ký",
+    "hasAccountPrefix": "Đã có tài khoản?",
+    "loginLinkText": "Đăng nhập"
+  },
   "payment": {
     "title": "Thanh Toán",
     "order_summary": "Xác Nhận Đơn Hàng",
@@ -131,6 +171,29 @@
     "try_again": "Thử Lại",
     "download_now": "Tải Game Ngay"
   },
+  "paymentPage": {
+    "createOrderError": "Không thể tạo đơn hàng",
+    "successTitle": "Thanh toán thành công!",
+    "successDescription": "Cảm ơn bạn đã mua game. Bạn có thể tải game ngay bây giờ.",
+    "expiredTitle": "Đơn hàng đã hết hạn",
+    "expiredDescription": "Thời gian thanh toán đã hết. Vui lòng thử lại.",
+    "retry": "Thử Lại",
+    "orderSummary": "Xác Nhận Đơn Hàng",
+    "processing": "Đang xử lý...",
+    "payNowPrice": "Thanh Toán 49,000₫",
+    "goBack": "← Quay lại",
+    "qrTitle": "Quét QR Để Thanh Toán",
+    "qrDescription": "Chuyển khoản ngân hàng với nội dung chính xác",
+    "bank": "Ngân Hàng:",
+    "accountNumber": "Số Tài Khoản:",
+    "accountHolder": "Chủ Tài Khoản:",
+    "amount": "Số Tiền:",
+    "transferContent": "Nội Dung CK:",
+    "remaining": "Còn Lại:",
+    "waiting": "Đang chờ thanh toán...",
+    "confirmPaid": "Tôi Đã Thanh Toán",
+    "cancel": "Hủy"
+  },
   "profile": {
     "title": "Hồ Sơ Cá Nhân",
     "member_since": "Thành viên từ",
@@ -145,6 +208,22 @@
     "order_code": "Mã Đơn",
     "amount": "Số Tiền",
     "status": "Trạng Thái"
+  },
+  "profilePage": {
+    "loading": "Đang tải hồ sơ...",
+    "default_name": "User",
+    "admin_link": "Quản Trị →",
+    "owned_game": "Game đã mua",
+    "buy_game": "Mua game",
+    "version": "Phiên bản: {version}",
+    "download_now": "Tải về",
+    "buy_now": "Mua ngay",
+    "no_transactions": "Chưa có giao dịch nào",
+    "logout": "Đăng xuất",
+    "status_pending": "Chờ thanh toán",
+    "status_paid": "Đã thanh toán",
+    "status_failed": "Thất bại",
+    "status_expired": "Hết hạn"
   },
   "download": {
     "title": "Tải Game",
@@ -161,6 +240,25 @@
       "4": "Bắt đầu chơi!"
     }
   },
+  "downloadPage": {
+    "generateError": "Không thể tạo link tải",
+    "preparing": "Đang chuẩn bị tải game...",
+    "errorTitle": "Lỗi",
+    "retry": "Thử Lại",
+    "downloading": "Đang tải...",
+    "downloadWindows": "Tải Về cho Windows",
+    "installationTitle": "Hướng Dẫn Cài Đặt",
+    "steps": {
+      "extractTitle": "Giải nén",
+      "extractDesc": "Giải nén file ZIP đã tải về",
+      "installTitle": "Cài đặt",
+      "installDesc": "Chạy file .exe để cài đặt game",
+      "loginTitle": "Đăng nhập",
+      "loginDesc": "Đăng nhập bằng tài khoản đã đăng ký",
+      "playTitle": "Chơi!",
+      "playDesc": "Bắt đầu trải nghiệm game"
+    }
+  },
   "admin": {
     "dashboard": "Bảng Điều Khiển",
     "users": "Người Dùng",
@@ -172,6 +270,64 @@
       "total_orders": "Tổng Đơn",
       "today_visits": "Lượt Truy Cập Hôm Nay"
     }
+  },
+  "adminDashboard": {
+    "backOffice": "Back office",
+    "title": "Admin Dashboard",
+    "loading": "Đang tải dashboard...",
+    "refresh": "Làm mới dữ liệu",
+    "backToProfile": "← Hồ sơ",
+    "totalUsers": "Tổng người dùng",
+    "totalOrders": "Tổng đơn hàng",
+    "totalRevenue": "Tổng doanh thu",
+    "todayVisits": "Lượt truy cập hôm nay",
+    "revenue30Days": "Doanh thu 30 ngày",
+    "revenueDescription": "Theo dõi xu hướng thanh toán theo ngày, dễ nhìn hơn và có tooltip chi tiết.",
+    "last30Days": "30 ngày gần nhất",
+    "ordersTab": "Đơn hàng",
+    "usersTab": "Người dùng",
+    "allOrders": "Tất cả đơn hàng",
+    "allOrdersDescription": "Hiển thị toàn bộ đơn hàng theo từng trang, thao tác đổi trạng thái ngay tại đây.",
+    "ordersCount": "{count} đơn",
+    "orderCode": "Mã đơn",
+    "customer": "Khách hàng",
+    "amount": "Số tiền",
+    "status": "Trạng thái",
+    "createdAt": "Ngày tạo",
+    "loadingOrders": "Đang tải đơn hàng...",
+    "noOrders": "Chưa có đơn hàng.",
+    "savingChanges": "Đang lưu thay đổi...",
+    "previous": "Trước",
+    "next": "Sau",
+    "allUsers": "Tất cả người dùng",
+    "allUsersDescription": "Danh sách người dùng mới nhất theo từng trang, có thể khóa và mở lại tài khoản.",
+    "usersCount": "{count} người dùng",
+    "user": "Người dùng",
+    "role": "Vai trò",
+    "accountStatus": "Trạng thái",
+    "action": "Thao tác",
+    "loadingUsers": "Đang tải người dùng...",
+    "noUsers": "Chưa có người dùng.",
+    "unnamed": "Chưa đặt tên",
+    "purchased": "Đã mua",
+    "locked": "Đã khóa",
+    "active": "Hoạt động",
+    "saving": "Đang lưu...",
+    "reactivate": "Kích hoạt lại",
+    "deactivate": "Hủy kích hoạt",
+    "pageLabel": "Trang {current}/{total}",
+    "status_pending": "Chờ TT",
+    "status_paid": "Đã TT",
+    "status_failed": "Thất bại",
+    "status_expired": "Hết hạn",
+    "updateOrderError": "Không thể cập nhật trạng thái đơn hàng",
+    "updateUserError": "Không thể cập nhật trạng thái tài khoản",
+    "revenueSeries": "Doanh thu"
+  },
+  "layoutMeta": {
+    "defaultTitle": "The Green Memoir - Game Nông Trại 2D Việt Nam",
+    "description": "Game nông trại 2D với văn hóa Việt Nam. Trồng trọt, khám phá và xây dựng nông trại của riêng bạn.",
+    "openGraphDescription": "Ký ức xanh của miền quê Việt Nam"
   },
   "footer": {
     "description": "Game nông trại 2D với văn hóa Việt Nam",

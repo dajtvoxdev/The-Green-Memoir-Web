@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -55,15 +56,10 @@ interface RevenuePoint {
 const ORDER_PAGE_SIZE = 12;
 const USER_PAGE_SIZE = 12;
 
-const statusOptions: Array<{ value: AdminOrder['status']; label: string }> = [
-  { value: 'pending', label: 'Chờ TT' },
-  { value: 'paid', label: 'Đã TT' },
-  { value: 'failed', label: 'Thất bại' },
-  { value: 'expired', label: 'Hết hạn' },
-];
-
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('adminDashboard');
   const { isLoggedIn, isAdmin, loading: authLoading } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -81,6 +77,12 @@ export default function AdminDashboardPage() {
   const [savingOrderId, setSavingOrderId] = useState<string | null>(null);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'orders' | 'users'>('orders');
+  const statusOptions: Array<{ value: AdminOrder['status']; label: string }> = [
+    { value: 'pending', label: t('status_pending') },
+    { value: 'paid', label: t('status_paid') },
+    { value: 'failed', label: t('status_failed') },
+    { value: 'expired', label: t('status_expired') },
+  ];
 
   useEffect(() => {
     if (authLoading) return;
@@ -209,7 +211,7 @@ export default function AdminDashboardPage() {
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleString('vi-VN', {
+    return new Date(dateStr).toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -227,10 +229,10 @@ export default function AdminDashboardPage() {
     };
 
     const labels: Record<AdminOrder['status'], string> = {
-      pending: 'Chờ TT',
-      paid: 'Đã TT',
-      failed: 'Thất bại',
-      expired: 'Hết hạn',
+      pending: t('status_pending'),
+      paid: t('status_paid'),
+      failed: t('status_failed'),
+      expired: t('status_expired'),
     };
 
     return (
@@ -257,13 +259,13 @@ export default function AdminDashboardPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Không thể cập nhật trạng thái đơn hàng');
+        throw new Error(data.error || t('updateOrderError'));
       }
 
       await Promise.all([refreshSummary(), fetchOrdersPage(ordersPage)]);
     } catch (err) {
       setOrders(previousOrders);
-      setError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái đơn hàng');
+      setError(err instanceof Error ? err.message : t('updateOrderError'));
     } finally {
       setSavingOrderId(null);
     }
@@ -286,13 +288,13 @@ export default function AdminDashboardPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Không thể cập nhật trạng thái tài khoản');
+        throw new Error(data.error || t('updateUserError'));
       }
 
       await Promise.all([refreshSummary(), fetchUsersPage(usersPage)]);
     } catch (err) {
       setUsers(previousUsers);
-      setError(err instanceof Error ? err.message : 'Không thể cập nhật trạng thái tài khoản');
+      setError(err instanceof Error ? err.message : t('updateUserError'));
     } finally {
       setSavingUserId(null);
     }
@@ -313,14 +315,14 @@ export default function AdminDashboardPage() {
 
   const chartData: ChartData<'line'> = {
     labels: revenueChart.map((point) =>
-      new Date(point.date).toLocaleDateString('vi-VN', {
+      new Date(point.date).toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', {
         day: '2-digit',
         month: '2-digit',
       }),
     ),
     datasets: [
       {
-        label: 'Doanh thu',
+        label: t('revenueSeries'),
         data: revenueChart.map((point) => point.revenue),
         borderColor: '#2f6b4f',
         backgroundColor: 'rgba(47, 107, 79, 0.14)',
@@ -391,7 +393,7 @@ export default function AdminDashboardPage() {
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-cream">
         <div className="text-center">
           <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-green-main border-t-transparent" />
-          <p className="text-brown-dark">Đang tải dashboard...</p>
+          <p className="text-brown-dark">{t('loading')}</p>
         </div>
       </div>
     );
@@ -402,21 +404,21 @@ export default function AdminDashboardPage() {
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-brown-dark/70">Back office</p>
-            <h1 className="font-heading text-3xl text-green-dark">Admin Dashboard</h1>
+            <p className="text-sm uppercase tracking-[0.2em] text-brown-dark/70">{t('backOffice')}</p>
+            <h1 className="font-heading text-3xl text-green-dark">{t('title')}</h1>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => void handleRefresh()}
               className="rounded-full border border-border bg-white px-4 py-2 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main"
             >
-              Làm mới dữ liệu
+              {t('refresh')}
             </button>
             <button
               onClick={() => router.push('/profile')}
               className="rounded-full border border-border bg-white px-4 py-2 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main"
             >
-              ← Hồ sơ
+              {t('backToProfile')}
             </button>
           </div>
         </div>
@@ -430,19 +432,19 @@ export default function AdminDashboardPage() {
         {stats && (
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <div className="card bg-white p-5">
-              <p className="mb-2 text-sm text-brown-dark">Tổng người dùng</p>
+              <p className="mb-2 text-sm text-brown-dark">{t('totalUsers')}</p>
               <p className="font-heading text-3xl text-green-dark">{stats.totalUsers}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="mb-2 text-sm text-brown-dark">Tổng đơn hàng</p>
+              <p className="mb-2 text-sm text-brown-dark">{t('totalOrders')}</p>
               <p className="font-heading text-3xl text-green-dark">{stats.totalOrders}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="mb-2 text-sm text-brown-dark">Tổng doanh thu</p>
+              <p className="mb-2 text-sm text-brown-dark">{t('totalRevenue')}</p>
               <p className="font-heading text-3xl text-green-dark">{formatCurrency(stats.totalRevenue)}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="mb-2 text-sm text-brown-dark">Lượt truy cập hôm nay</p>
+              <p className="mb-2 text-sm text-brown-dark">{t('todayVisits')}</p>
               <p className="font-heading text-3xl text-green-dark">{stats.todayVisits}</p>
             </div>
           </div>
@@ -452,13 +454,13 @@ export default function AdminDashboardPage() {
           <div className="border-b border-border px-6 py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 className="font-heading text-xl text-green-dark">Doanh thu 30 ngày</h2>
+                <h2 className="font-heading text-xl text-green-dark">{t('revenue30Days')}</h2>
                 <p className="mt-1 text-sm text-brown-dark">
-                  Theo dõi xu hướng thanh toán theo ngày, dễ nhìn hơn và có tooltip chi tiết.
+                  {t('revenueDescription')}
                 </p>
               </div>
               <div className="rounded-2xl bg-cream px-4 py-3 text-sm text-brown-dark">
-                <span className="block text-xs uppercase tracking-[0.18em] text-brown-dark/70">30 ngày gần nhất</span>
+                <span className="block text-xs uppercase tracking-[0.18em] text-brown-dark/70">{t('last30Days')}</span>
                 <span className="font-heading text-lg text-green-dark">
                   {formatCurrency(revenueChart.reduce((sum, point) => sum + point.revenue, 0))}
                 </span>
@@ -481,7 +483,7 @@ export default function AdminDashboardPage() {
                     : 'bg-cream text-brown-dark hover:bg-cream-dark'
                 }`}
               >
-                Đơn hàng
+                {t('ordersTab')}
               </button>
               <button
                 onClick={() => setActiveTab('users')}
@@ -491,7 +493,7 @@ export default function AdminDashboardPage() {
                     : 'bg-cream text-brown-dark hover:bg-cream-dark'
                 }`}
               >
-                Người dùng
+                {t('usersTab')}
               </button>
             </div>
           </div>
@@ -501,13 +503,13 @@ export default function AdminDashboardPage() {
             <div className="border-b border-border px-6 py-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="font-heading text-xl text-green-dark">Tất cả đơn hàng</h2>
+                  <h2 className="font-heading text-xl text-green-dark">{t('allOrders')}</h2>
                   <p className="mt-1 text-sm text-brown-dark">
-                    Hiển thị toàn bộ đơn hàng theo từng trang, thao tác đổi trạng thái ngay tại đây.
+                    {t('allOrdersDescription')}
                   </p>
                 </div>
                 <span className="rounded-full bg-cream px-3 py-1 text-sm text-brown-dark">
-                  {ordersTotal} đơn
+                  {t('ordersCount', { count: ordersTotal })}
                 </span>
               </div>
             </div>
@@ -516,24 +518,24 @@ export default function AdminDashboardPage() {
               <table className="min-w-full text-left">
                 <thead className="bg-cream/70 text-xs uppercase tracking-[0.16em] text-brown-dark/70">
                   <tr>
-                    <th className="px-6 py-4">Mã đơn</th>
-                    <th className="px-6 py-4">Khách hàng</th>
-                    <th className="px-6 py-4">Số tiền</th>
-                    <th className="px-6 py-4">Trạng thái</th>
-                    <th className="px-6 py-4">Ngày tạo</th>
+                    <th className="px-6 py-4">{t('orderCode')}</th>
+                    <th className="px-6 py-4">{t('customer')}</th>
+                    <th className="px-6 py-4">{t('amount')}</th>
+                    <th className="px-6 py-4">{t('status')}</th>
+                    <th className="px-6 py-4">{t('createdAt')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {ordersLoading ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
-                        Đang tải đơn hàng...
+                        {t('loadingOrders')}
                       </td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
-                        Chưa có đơn hàng.
+                        {t('noOrders')}
                       </td>
                     </tr>
                   ) : (
@@ -568,7 +570,7 @@ export default function AdminDashboardPage() {
                               ))}
                             </select>
                             {savingOrderId === order.id && (
-                              <p className="text-xs text-brown-dark/70">Đang lưu thay đổi...</p>
+                              <p className="text-xs text-brown-dark/70">{t('savingChanges')}</p>
                             )}
                           </div>
                         </td>
@@ -582,7 +584,7 @@ export default function AdminDashboardPage() {
 
             <div className="flex flex-col gap-3 border-t border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-brown-dark">
-                Trang {ordersPage}/{ordersPagination.totalPages}
+                {t('pageLabel', { current: ordersPage, total: ordersPagination.totalPages })}
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -590,7 +592,7 @@ export default function AdminDashboardPage() {
                   disabled={ordersPage === 1 || ordersLoading}
                   className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
                 >
-                  Trước
+                  {t('previous')}
                 </button>
                 {ordersPagination.pages.map((page) => (
                   <button
@@ -610,7 +612,7 @@ export default function AdminDashboardPage() {
                   disabled={ordersPage === ordersPagination.totalPages || ordersLoading}
                   className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
                 >
-                  Sau
+                  {t('next')}
                 </button>
               </div>
             </div>
@@ -620,13 +622,13 @@ export default function AdminDashboardPage() {
             <div className="border-b border-border px-6 py-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h2 className="font-heading text-xl text-green-dark">Tất cả người dùng</h2>
+                  <h2 className="font-heading text-xl text-green-dark">{t('allUsers')}</h2>
                   <p className="mt-1 text-sm text-brown-dark">
-                    Danh sách người dùng mới nhất theo từng trang, có thể khóa và mở lại tài khoản.
+                    {t('allUsersDescription')}
                   </p>
                 </div>
                 <span className="rounded-full bg-cream px-3 py-1 text-sm text-brown-dark">
-                  {usersTotal} người dùng
+                  {t('usersCount', { count: usersTotal })}
                 </span>
               </div>
             </div>
@@ -635,24 +637,24 @@ export default function AdminDashboardPage() {
               <table className="min-w-full text-left">
                 <thead className="bg-cream/70 text-xs uppercase tracking-[0.16em] text-brown-dark/70">
                   <tr>
-                    <th className="px-6 py-4">Người dùng</th>
-                    <th className="px-6 py-4">Vai trò</th>
-                    <th className="px-6 py-4">Trạng thái</th>
-                    <th className="px-6 py-4">Ngày tạo</th>
-                    <th className="px-6 py-4">Thao tác</th>
+                    <th className="px-6 py-4">{t('user')}</th>
+                    <th className="px-6 py-4">{t('role')}</th>
+                    <th className="px-6 py-4">{t('accountStatus')}</th>
+                    <th className="px-6 py-4">{t('createdAt')}</th>
+                    <th className="px-6 py-4">{t('action')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {usersLoading ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
-                        Đang tải người dùng...
+                        {t('loadingUsers')}
                       </td>
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-10 text-center text-sm text-brown-dark">
-                        Chưa có người dùng.
+                        {t('noUsers')}
                       </td>
                     </tr>
                   ) : (
@@ -665,7 +667,7 @@ export default function AdminDashboardPage() {
                             </div>
                             <div className="min-w-0">
                               <p className="truncate text-sm font-medium text-brown-dark">
-                                {user.displayName || 'Chưa đặt tên'}
+                                {user.displayName || t('unnamed')}
                               </p>
                               <p className="truncate text-sm text-brown-dark/80">{user.email}</p>
                               <p className="mt-1 truncate text-xs text-brown-dark/60">{user.uid}</p>
@@ -681,7 +683,7 @@ export default function AdminDashboardPage() {
                             )}
                             {user.hasPurchased && (
                               <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
-                                Đã mua
+                                {t('purchased')}
                               </span>
                             )}
                             {user.role !== 'admin' && !user.hasPurchased && (
@@ -694,11 +696,11 @@ export default function AdminDashboardPage() {
                         <td className="px-6 py-4">
                           {user.disabled ? (
                             <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
-                              Đã khóa
+                              {t('locked')}
                             </span>
                           ) : (
                             <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                              Hoạt động
+                              {t('active')}
                             </span>
                           )}
                         </td>
@@ -714,10 +716,10 @@ export default function AdminDashboardPage() {
                             }`}
                           >
                             {savingUserId === user.uid
-                              ? 'Đang lưu...'
+                              ? t('saving')
                               : user.disabled
-                                ? 'Kích hoạt lại'
-                                : 'Hủy kích hoạt'}
+                                ? t('reactivate')
+                                : t('deactivate')}
                           </button>
                         </td>
                       </tr>
@@ -729,7 +731,7 @@ export default function AdminDashboardPage() {
 
             <div className="flex flex-col gap-3 border-t border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-brown-dark">
-                Trang {usersPage}/{usersPagination.totalPages}
+                {t('pageLabel', { current: usersPage, total: usersPagination.totalPages })}
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -737,7 +739,7 @@ export default function AdminDashboardPage() {
                   disabled={usersPage === 1 || usersLoading}
                   className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
                 >
-                  Trước
+                  {t('previous')}
                 </button>
                 {usersPagination.pages.map((page) => (
                   <button
@@ -757,7 +759,7 @@ export default function AdminDashboardPage() {
                   disabled={usersPage === usersPagination.totalPages || usersLoading}
                   className="rounded-full border border-border px-3 py-1.5 text-sm text-brown-dark transition hover:border-green-main hover:text-green-main disabled:opacity-50"
                 >
-                  Sau
+                  {t('next')}
                 </button>
               </div>
             </div>
