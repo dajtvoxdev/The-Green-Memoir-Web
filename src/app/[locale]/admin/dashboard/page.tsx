@@ -80,6 +80,7 @@ export default function AdminDashboardPage() {
   const [usersLoading, setUsersLoading] = useState(false);
   const [savingOrderId, setSavingOrderId] = useState<string | null>(null);
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'orders' | 'users'>('orders');
 
   useEffect(() => {
     if (authLoading) return;
@@ -469,8 +470,34 @@ export default function AdminDashboardPage() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
-          <section className="card overflow-hidden bg-white">
+        <section className="card overflow-hidden bg-white">
+          <div className="border-b border-border px-6 pt-5">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`rounded-t-2xl px-5 py-3 text-sm font-medium transition ${
+                  activeTab === 'orders'
+                    ? 'bg-green-dark text-white'
+                    : 'bg-cream text-brown-dark hover:bg-cream-dark'
+                }`}
+              >
+                Đơn hàng
+              </button>
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`rounded-t-2xl px-5 py-3 text-sm font-medium transition ${
+                  activeTab === 'users'
+                    ? 'bg-green-dark text-white'
+                    : 'bg-cream text-brown-dark hover:bg-cream-dark'
+                }`}
+              >
+                Người dùng
+              </button>
+            </div>
+          </div>
+
+          {activeTab === 'orders' ? (
+            <section>
             <div className="border-b border-border px-6 py-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -587,9 +614,9 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </div>
-          </section>
-
-          <section className="card overflow-hidden bg-white">
+            </section>
+          ) : (
+            <section>
             <div className="border-b border-border px-6 py-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -734,8 +761,9 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </div>
-          </section>
-        </div>
+            </section>
+          )}
+        </section>
       </div>
     </div>
   );
