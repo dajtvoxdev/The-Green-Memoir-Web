@@ -1,10 +1,10 @@
 import { existsSync, statSync } from 'fs';
 import { join } from 'path';
 
-const BUNDLED_GAME_FILE_NAME = 'The Green Memoir_v0.01.rar';
-const BUNDLED_GAME_VERSION_ID = 'bundled-public-v0.01';
-const BUNDLED_GAME_VERSION_NUMBER = 'v0.01';
-const BUNDLED_GAME_DISPLAY_NAME = 'The Green Memoir v0.01';
+const BUNDLED_GAME_FILE_NAME = 'Setup_MoonlitGarden_v0.02.exe';
+const BUNDLED_GAME_VERSION_ID = 'bundled-public-v0.02';
+const BUNDLED_GAME_VERSION_NUMBER = 'v0.02';
+const BUNDLED_GAME_DISPLAY_NAME = 'Moonlit Garden v0.02 Setup';
 const BUNDLED_GAME_DOWNLOAD_URL = `/game/${encodeURIComponent(BUNDLED_GAME_FILE_NAME)}`;
 
 export interface BundledGameDownload {
