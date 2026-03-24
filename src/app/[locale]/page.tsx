@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import Script from 'next/script';
 import { Link } from '@/i18n/navigation';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -114,18 +115,19 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
 
       <section id="trailer" className="bg-cream-dark py-20">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl">
-            <div className="relative border-4 border-brown-dark bg-brown-light p-2">
-              <div className="aspect-video bg-black">
-                <iframe
-                  className="h-full w-full"
-                  src="https://www.youtube.com/embed/placeholder"
-                  title="The Green Memoir Trailer"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            </div>
+          <div className="mx-auto flex max-w-xl flex-col items-center">
+            <blockquote
+              className="tiktok-embed"
+              cite="https://www.tiktok.com/@the.green.memoir/video/7615870408457342228"
+              data-video-id="7615870408457342228"
+              style={{ maxWidth: 605, minWidth: 325, width: '100%' }}
+            >
+              <section>
+                <a target="_blank" title="@the.green.memoir" href="https://www.tiktok.com/@the.green.memoir?refer=embed">
+                  @the.green.memoir
+                </a>
+              </section>
+            </blockquote>
 
             <p className="mt-6 text-center text-lg text-brown-dark">{tLanding('trailerDescription')}</p>
           </div>
@@ -274,6 +276,8 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
           </div>
         </div>
       </section>
+
+      <Script src="https://www.tiktok.com/embed.js" strategy="lazyOnload" />
     </div>
   );
 }
