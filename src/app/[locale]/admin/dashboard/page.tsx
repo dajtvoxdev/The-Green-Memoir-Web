@@ -25,7 +25,7 @@ interface Stats {
   paidOrders: number;
   totalRevenue: number;
   todayVisits: number;
-  todayUniqueVisitors: number;
+  totalVisits: number;
 }
 
 interface AdminOrder {
@@ -478,8 +478,8 @@ export default function AdminDashboardPage() {
               <p className="font-heading text-3xl text-green-dark">{stats.todayVisits}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="mb-2 text-sm text-brown-dark">{t('todayUniqueVisitors')}</p>
-              <p className="font-heading text-3xl text-green-dark">{stats.todayUniqueVisitors}</p>
+              <p className="mb-2 text-sm text-brown-dark">{t('totalVisits')}</p>
+              <p className="font-heading text-3xl text-green-dark">{stats.totalVisits}</p>
             </div>
           </div>
         )}

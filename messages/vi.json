@@ -301,7 +301,7 @@
     "paidOrders": "Đơn hàng đã thanh toán",
     "totalRevenue": "Tổng doanh thu",
     "todayVisits": "Lượt truy cập hôm nay",
-    "todayUniqueVisitors": "Khách truy cập duy nhất hôm nay",
+    "totalVisits": "Tổng lượt truy cập",
     "revenue30Days": "Doanh thu 30 ngày",
     "revenueDescription": "Theo dõi xu hướng thanh toán theo ngày, dễ nhìn hơn và có tooltip chi tiết.",
     "last30Days": "30 ngày gần nhất",

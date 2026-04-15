@@ -27,6 +27,13 @@ export async function GET(request: NextRequest) {
     const usersSnapshot = await adminDb.collection(COLLECTIONS.WEB_USERS).count().get();
     const totalUsers = usersSnapshot.data().count;
 
+    // Get total visits
+    const siteStatsSnapshot = await adminDb.collection(COLLECTIONS.SITE_STATS).get();
+    let totalVisits = 0;
+    siteStatsSnapshot.forEach((doc) => {
+      totalVisits += doc.data().pageViews || 0;
+    });
+
     // Get total orders and revenue
     const ordersSnapshot = await adminDb.collection(COLLECTIONS.ORDERS).get();
     let paidOrders = 0;
@@ -49,7 +56,7 @@ export async function GET(request: NextRequest) {
     const today = getVietnamDateKey();
     const todayStats = await adminDb.collection(COLLECTIONS.SITE_STATS).doc(today).get();
     const todayVisits = todayStats.exists ? todayStats.data()?.pageViews || 0 : 0;
-    const todayUniqueVisitors = todayStats.exists ? todayStats.data()?.uniqueVisitors || 0 : 0;
+    
 
     // Get recent orders (last 10)
     const recentOrdersSnapshot = await adminDb.collection(COLLECTIONS.ORDERS)
@@ -105,7 +112,7 @@ export async function GET(request: NextRequest) {
         paidOrders,
         totalRevenue,
         todayVisits,
-        todayUniqueVisitors,
+        totalVisits,
       },
       recentOrders,
       recentUsers,

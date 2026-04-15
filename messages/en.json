@@ -308,7 +308,7 @@
     "paidOrders": "Paid orders",
     "totalRevenue": "Total revenue",
     "todayVisits": "Today's visits",
-    "todayUniqueVisitors": "Today's unique visitors",
+    "totalVisits": "Total visits",
     "revenue30Days": "30-day revenue",
     "revenueDescription": "Track daily payment trends with a clearer chart and detailed tooltip.",
     "last30Days": "Last 30 days",
