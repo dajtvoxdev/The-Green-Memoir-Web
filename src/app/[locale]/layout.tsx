@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { locales } from '@/i18n/index';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PageViewTracker from '@/components/analytics/PageViewTracker';
 import { AuthProvider } from '@/contexts/AuthContext';
 import '../globals.css';
 
@@ -73,6 +74,7 @@ export default async function LocaleLayout({
       <body className="min-h-screen flex flex-col font-body">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
+            <PageViewTracker />
             <Header />
             <main className="flex-1 pt-16">{children}</main>
             <Footer />

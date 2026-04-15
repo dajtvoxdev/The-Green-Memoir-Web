@@ -78,6 +78,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const uid = typeof body.uid === 'string' ? body.uid.trim() : '';
     const disabled = typeof body.disabled === 'boolean' ? body.disabled : null;
+    const role = body.role === 'admin' ? 'admin' : null;
 
     if (!uid) {
       return NextResponse.json(
@@ -86,9 +87,9 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    if (disabled === null) {
+    if (disabled === null && role === null) {
       return NextResponse.json(
-        { error: 'disabled must be a boolean' },
+        { error: 'disabled must be a boolean or role must be admin' },
         { status: 400 }
       );
     }
@@ -100,25 +101,36 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    await adminAuth.updateUser(uid, { disabled });
+    if (disabled !== null) {
+      await adminAuth.updateUser(uid, { disabled });
 
-    if (disabled) {
-      await adminAuth.revokeRefreshTokens(uid);
+      if (disabled) {
+        await adminAuth.revokeRefreshTokens(uid);
+      }
     }
 
-    await adminDb.collection(COLLECTIONS.WEB_USERS).doc(uid).set(
-      {
-        disabled,
-        updatedAt: Timestamp.now(),
-      },
-      { merge: true }
-    );
+    if (role === 'admin') {
+      const userRecord = await adminAuth.getUser(uid);
+      await adminAuth.setCustomUserClaims(uid, { ...(userRecord.customClaims || {}), role: 'admin' });
+    }
+
+    await adminDb.collection(COLLECTIONS.WEB_USERS).doc(uid).set({
+      ...(disabled !== null ? { disabled } : {}),
+      ...(role === 'admin' ? { role: 'admin' } : {}),
+      updatedAt: Timestamp.now(),
+    }, { merge: true });
 
     return NextResponse.json({
       success: true,
       uid,
       disabled,
-      message: disabled ? 'User account deactivated' : 'User account reactivated',
+      role,
+      message:
+        role === 'admin'
+          ? 'User promoted to admin'
+          : disabled
+            ? 'User account deactivated'
+            : 'User account reactivated',
     });
   } catch (error: any) {
     console.error('Admin update user error:', error);

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, isAdmin } from '@/lib/auth';
 import { adminDb, COLLECTIONS } from '@/lib/firebase-admin';
-import { Timestamp } from 'firebase-admin/firestore';
+import { getVietnamDateKey } from '@/lib/date';
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,16 +29,16 @@ export async function GET(request: NextRequest) {
 
     // Get total orders and revenue
     const ordersSnapshot = await adminDb.collection(COLLECTIONS.ORDERS).get();
-    let totalOrders = 0;
+    let paidOrders = 0;
     let totalRevenue = 0;
-    const paidOrders: Array<{ amount: number; paidAt: string | null }> = [];
+    const paidOrderEntries: Array<{ amount: number; paidAt: string | null }> = [];
     
     ordersSnapshot.forEach(doc => {
-      totalOrders++;
       const data = doc.data();
       if (data.status === 'paid') {
+        paidOrders++;
         totalRevenue += data.amount || 0;
-        paidOrders.push({ 
+        paidOrderEntries.push({ 
           amount: data.amount || 0, 
           paidAt: data.paidAt?.toDate().toISOString() || data.createdAt?.toDate().toISOString() || null 
         });
@@ -46,9 +46,10 @@ export async function GET(request: NextRequest) {
     });
 
     // Get today's stats
-    const today = new Date().toISOString().split('T')[0];
+    const today = getVietnamDateKey();
     const todayStats = await adminDb.collection(COLLECTIONS.SITE_STATS).doc(today).get();
     const todayVisits = todayStats.exists ? todayStats.data()?.pageViews || 0 : 0;
+    const todayUniqueVisitors = todayStats.exists ? todayStats.data()?.uniqueVisitors || 0 : 0;
 
     // Get recent orders (last 10)
     const recentOrdersSnapshot = await adminDb.collection(COLLECTIONS.ORDERS)
@@ -81,13 +82,13 @@ export async function GET(request: NextRequest) {
     for (let i = 0; i < 30; i++) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = getVietnamDateKey(date);
       revenueByDate[dateStr] = 0;
     }
 
-    paidOrders.forEach(order => {
+    paidOrderEntries.forEach(order => {
       if (order.paidAt) {
-        const dateStr = order.paidAt.split('T')[0];
+        const dateStr = getVietnamDateKey(new Date(order.paidAt));
         if (revenueByDate[dateStr] !== undefined) {
           revenueByDate[dateStr] += order.amount;
         }
@@ -101,9 +102,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       stats: {
         totalUsers,
-        totalOrders,
+        paidOrders,
         totalRevenue,
         todayVisits,
+        todayUniqueVisitors,
       },
       recentOrders,
       recentUsers,

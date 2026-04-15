@@ -22,9 +22,10 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 interface Stats {
   totalUsers: number;
-  totalOrders: number;
+  paidOrders: number;
   totalRevenue: number;
   todayVisits: number;
+  todayUniqueVisitors: number;
 }
 
 interface AdminOrder {
@@ -300,6 +301,35 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handlePromoteToAdmin = async (uid: string) => {
+    const previousUsers = users;
+    setSavingUserId(uid);
+    setError('');
+    setUsers((current) => current.map((user) => (user.uid === uid ? { ...user, role: 'admin' } : user)));
+
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uid, role: 'admin' }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || t('promoteAdminError'));
+      }
+
+      await Promise.all([refreshSummary(), fetchUsersPage(usersPage)]);
+    } catch (err) {
+      setUsers(previousUsers);
+      setError(err instanceof Error ? err.message : t('promoteAdminError'));
+    } finally {
+      setSavingUserId(null);
+    }
+  };
+
   const buildPageNumbers = (totalItems: number, pageSize: number, currentPage: number) => {
     const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
     const startPage = Math.max(1, currentPage - 2);
@@ -430,14 +460,14 @@ export default function AdminDashboardPage() {
         )}
 
         {stats && (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
             <div className="card bg-white p-5">
               <p className="mb-2 text-sm text-brown-dark">{t('totalUsers')}</p>
               <p className="font-heading text-3xl text-green-dark">{stats.totalUsers}</p>
             </div>
             <div className="card bg-white p-5">
-              <p className="mb-2 text-sm text-brown-dark">{t('totalOrders')}</p>
-              <p className="font-heading text-3xl text-green-dark">{stats.totalOrders}</p>
+              <p className="mb-2 text-sm text-brown-dark">{t('paidOrders')}</p>
+              <p className="font-heading text-3xl text-green-dark">{stats.paidOrders}</p>
             </div>
             <div className="card bg-white p-5">
               <p className="mb-2 text-sm text-brown-dark">{t('totalRevenue')}</p>
@@ -446,6 +476,10 @@ export default function AdminDashboardPage() {
             <div className="card bg-white p-5">
               <p className="mb-2 text-sm text-brown-dark">{t('todayVisits')}</p>
               <p className="font-heading text-3xl text-green-dark">{stats.todayVisits}</p>
+            </div>
+            <div className="card bg-white p-5">
+              <p className="mb-2 text-sm text-brown-dark">{t('todayUniqueVisitors')}</p>
+              <p className="font-heading text-3xl text-green-dark">{stats.todayUniqueVisitors}</p>
             </div>
           </div>
         )}
@@ -623,9 +657,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h2 className="font-heading text-xl text-green-dark">{t('allUsers')}</h2>
-                  <p className="mt-1 text-sm text-brown-dark">
-                    {t('allUsersDescription')}
-                  </p>
+                  <p className="mt-1 text-sm text-brown-dark">{t('allUsersDescription')}</p>
                 </div>
                 <span className="rounded-full bg-cream px-3 py-1 text-sm text-brown-dark">
                   {t('usersCount', { count: usersTotal })}
@@ -706,21 +738,32 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="px-6 py-4 text-sm text-brown-dark">{formatDate(user.createdAt)}</td>
                         <td className="px-6 py-4">
-                          <button
-                            onClick={() => void handleUserDisabledChange(user.uid, !(user.disabled || false))}
-                            disabled={savingUserId === user.uid || user.role === 'admin'}
-                            className={`rounded-full px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                              user.disabled
-                                ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                : 'bg-red-100 text-red-700 hover:bg-red-200'
-                            }`}
-                          >
-                            {savingUserId === user.uid
-                              ? t('saving')
-                              : user.disabled
-                                ? t('reactivate')
-                                : t('deactivate')}
-                          </button>
+                          <div className="flex flex-wrap gap-2">
+                            {user.role !== 'admin' && (
+                              <button
+                                onClick={() => void handlePromoteToAdmin(user.uid)}
+                                disabled={savingUserId === user.uid}
+                                className="rounded-full bg-purple-100 px-3 py-2 text-xs font-medium text-purple-800 transition hover:bg-purple-200 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {savingUserId === user.uid ? t('saving') : t('promoteAdmin')}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => void handleUserDisabledChange(user.uid, !(user.disabled || false))}
+                              disabled={savingUserId === user.uid || user.role === 'admin'}
+                              className={`rounded-full px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                user.disabled
+                                  ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                  : 'bg-red-100 text-red-700 hover:bg-red-200'
+                              }`}
+                            >
+                              {savingUserId === user.uid
+                                ? t('saving')
+                                : user.disabled
+                                  ? t('reactivate')
+                                  : t('deactivate')}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
